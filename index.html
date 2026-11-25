@@ -1,0 +1,4172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Atacadão dos Condimentos — Loja Virtual, WhatsApp & Gestão</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Fonte Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #FFFDF2;
+      color: #1F2937;
+    }
+
+    /* Animação do Carrinho Lateral */
+    @keyframes slideInRight {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+    .drawer-slide {
+      animation: slideInRight 0.22s ease-out forwards;
+    }
+
+    /* Animação de Notificações Toast e Popups */
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .toast-anim {
+      animation: fadeSlideUp 0.2s ease-out forwards;
+    }
+
+    /* Barra de rolagem discreta */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #FEFCE8;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #EAB308;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#FFFDF2] text-[#1F2937] antialiased">
+
+  <!-- ===================================================================== -->
+  <!-- CABEÇALHO PRINCIPAL (AMARELO VIBRANTE #FACC15 + TEXTO ESCURO #1F2937)  -->
+  <!-- ===================================================================== -->
+  <header class="sticky top-0 z-40 bg-[#FACC15] border-b border-yellow-400/90 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 py-3">
+      <!-- Linha Superior: Marca, Conta Cliente, Carrinho e Área Admin -->
+      <div class="flex flex-wrap items-center justify-between gap-2.5">
+        <!-- Logo / Nome Dinâmico da Loja -->
+        <button
+          type="button"
+          onclick="switchTab('vitrine')"
+          class="flex items-center gap-2.5 text-left cursor-pointer focus:outline-none group"
+        >
+          <div class="w-10 h-10 rounded-xl bg-white border border-yellow-400 flex items-center justify-center shadow-2xs shrink-0">
+            <svg class="w-6 h-6 text-[#15803D]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M12 2C9 2 7 4.5 7 7.5c0 4.5 5 11.5 5 11.5s5-7 5-11.5C17 4.5 15 2 12 2z" fill="#FEF08A"/>
+              <path d="M12 2v4M9.5 4.5L12 6l2.5-1.5" stroke="#15803D" stroke-linecap="round"/>
+              <circle cx="12" cy="8.5" r="1.5" fill="#15803D"/>
+            </svg>
+          </div>
+          <div>
+            <span id="headerStoreName" class="font-extrabold text-base sm:text-xl tracking-tight text-[#1F2937] block leading-tight">
+              Atacadão dos Condimentos
+            </span>
+            <span class="text-[11px] sm:text-xs font-medium text-yellow-950/85 block">
+              Varejo & Atacado • 5+ un. com desconto automático
+            </span>
+          </div>
+        </button>
+
+        <!-- Ações Direitas -->
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Botão Conta Cliente -->
+          <div class="relative">
+            <button
+              type="button"
+              id="headerAuthBtn"
+              onclick="handleHeaderAuthClick()"
+              class="flex items-center gap-1.5 bg-white/95 hover:bg-white text-[#1F2937] font-bold text-xs sm:text-sm px-3 py-2.5 rounded-xl border border-yellow-400 shadow-2xs transition cursor-pointer"
+            >
+              <svg class="w-4 h-4 text-[#1F2937] shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+              </svg>
+              <span id="headerAuthLabel" class="max-w-[110px] sm:max-w-[150px] truncate">Entrar / Cadastrar</span>
+            </button>
+
+            <!-- Dropdown Cliente Logado -->
+            <div
+              id="userAccountDropdown"
+              class="hidden absolute right-0 mt-2 w-64 bg-white rounded-2xl border border-yellow-300 shadow-lg p-3 z-50 space-y-2"
+            >
+              <div class="pb-2 border-b border-slate-100">
+                <p id="dropdownUserName" class="text-xs font-extrabold text-[#1F2937] truncate"></p>
+                <p id="dropdownUserWhatsApp" class="text-[11px] text-[#15803D] font-semibold truncate"></p>
+                <p id="dropdownUserCep" class="text-[11px] text-slate-500 mt-0.5"></p>
+              </div>
+              <button
+                type="button"
+                onclick="closeUserDropdown(); switchTab('meus-pedidos')"
+                class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-[#1F2937] hover:bg-[#FEFCE8] transition cursor-pointer"
+              >
+                📦 Meus Pedidos & Rastreio
+              </button>
+              <button
+                type="button"
+                onclick="logoutUser()"
+                class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 transition cursor-pointer"
+              >
+                Sair da Conta
+              </button>
+            </div>
+          </div>
+
+          <!-- Botão Carrinho -->
+          <button
+            type="button"
+            onclick="toggleCart(true)"
+            class="flex items-center gap-2 bg-white hover:bg-[#FEFCE8] active:scale-95 text-[#1F2937] font-bold px-3.5 py-2.5 rounded-xl border border-yellow-400 shadow-2xs transition cursor-pointer"
+          >
+            <svg class="w-5 h-5 text-[#1F2937] shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            <span class="hidden sm:inline text-sm">Carrinho</span>
+            <span
+              id="headerCartCount"
+              class="bg-[#15803D] text-white text-xs font-extrabold min-w-[22px] h-5 px-1.5 rounded-full flex items-center justify-center"
+            >
+              0
+            </span>
+            <span id="headerCartTotal" class="hidden md:inline text-sm font-extrabold text-[#1F2937] pl-1.5 border-l border-yellow-300">
+              R$ 0,00
+            </span>
+          </button>
+
+          <!-- Botão Discreto Área Admin (RBAC) -->
+          <button
+            type="button"
+            id="headerAdminBtn"
+            onclick="handleAdminHeaderClick()"
+            class="flex items-center gap-1.5 bg-yellow-300/75 hover:bg-white text-[#1F2937] font-bold text-xs px-3 py-2.5 rounded-xl border border-yellow-500/50 transition cursor-pointer"
+            title="Acesso restrito ao painel administrativo"
+          >
+            <span id="headerAdminIcon">🔒</span>
+            <span id="headerAdminLabel" class="hidden sm:inline">Área Admin</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Barra de Navegação (Pública + Abas Admin quando autenticado) -->
+      <nav class="mt-3 pt-2.5 border-t border-yellow-500/35 flex flex-wrap items-center justify-between gap-2">
+        <!-- Navegação Pública -->
+        <div class="flex flex-wrap items-center gap-1.5">
+          <button
+            type="button"
+            id="tab-btn-vitrine"
+            onclick="switchTab('vitrine')"
+            class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer bg-[#1F2937] text-[#FACC15]"
+          >
+            Vitrine
+          </button>
+
+          <button
+            type="button"
+            id="tab-btn-meus-pedidos"
+            onclick="switchTab('meus-pedidos')"
+            class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer bg-white/85 hover:bg-white text-[#1F2937] flex items-center gap-1.5"
+          >
+            <span>Meus Pedidos</span>
+            <span id="navMyOrdersBadge" class="bg-yellow-200 text-[#1F2937] text-[11px] font-extrabold px-1.5 rounded-full">0</span>
+          </button>
+        </div>
+
+        <!-- Navegação Administrativa Protegida (RBAC) -->
+        <div id="adminNavBar" class="hidden flex-wrap items-center gap-1.5 bg-yellow-300/55 p-1 rounded-2xl border border-yellow-500/40">
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-yellow-950 px-2">Admin:</span>
+
+          <button
+            type="button"
+            id="tab-btn-admin-pedidos"
+            onclick="switchTab('admin-pedidos')"
+            class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-white/90 hover:bg-white text-[#1F2937] flex items-center gap-1"
+          >
+            <span>Pedidos Loja</span>
+            <span id="navAdminOrdersBadge" class="bg-[#15803D] text-white text-[10px] font-extrabold px-1.5 rounded-full">0</span>
+          </button>
+
+          <button
+            type="button"
+            id="tab-btn-admin-estoque"
+            onclick="switchTab('admin-estoque')"
+            class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-white/90 hover:bg-white text-[#1F2937]"
+          >
+            Estoque & Produtos
+          </button>
+
+          <button
+            type="button"
+            id="tab-btn-admin-caixa"
+            onclick="switchTab('admin-caixa')"
+            class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-white/90 hover:bg-white text-[#1F2937]"
+          >
+            Fluxo de Caixa
+          </button>
+
+          <button
+            type="button"
+            id="tab-btn-admin-config"
+            onclick="switchTab('admin-config')"
+            class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-white/90 hover:bg-white text-[#1F2937]"
+          >
+            Configurações & Backup
+          </button>
+
+          <button
+            type="button"
+            onclick="logoutAdmin()"
+            class="px-2.5 py-1.5 rounded-xl text-xs font-bold text-red-700 hover:bg-red-100 transition cursor-pointer"
+            title="Bloquear Painel Administrativo"
+          >
+            Sair Admin
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- CONTEÚDO PRINCIPAL                                                    -->
+  <!-- ===================================================================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6">
+
+    <!-- =================================================================== -->
+    <!-- ABA PÚBLICA 1: VITRINE                                              -->
+    <!-- =================================================================== -->
+    <section id="view-vitrine" class="space-y-5">
+      <!-- Banner Informativo Suave -->
+      <div class="bg-[#FEFCE8] border border-yellow-300 rounded-2xl px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2 text-xs sm:text-sm text-[#1F2937]">
+          <span class="bg-[#15803D] text-white text-[11px] font-extrabold px-2 py-0.5 rounded-lg uppercase shrink-0">Atacado</span>
+          <span>Compre <strong>5 ou mais unidades</strong> do mesmo condimento e ganhe desconto automático! Frete grátis acima de <strong>R$ 150,00</strong>.</span>
+        </div>
+        <span id="vitrineCountBadge" class="text-xs font-bold text-yellow-950 bg-white px-2.5 py-1 rounded-xl border border-yellow-200 shrink-0">
+          8 produtos
+        </span>
+      </div>
+
+      <!-- Barra de Busca e Filtros -->
+      <div class="bg-white rounded-2xl p-4 border border-yellow-200/90 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div class="relative flex-1 max-w-md">
+          <input
+            type="text"
+            id="vitrineSearchInput"
+            oninput="renderVitrine()"
+            placeholder="Buscar tempero, pimenta, erva ou peso..."
+            class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1F2937] focus:outline-none text-sm bg-[#FFFDF2]"
+          />
+          <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </svg>
+        </div>
+
+        <div id="vitrineCategoryPills" class="flex flex-wrap items-center gap-1.5">
+          <!-- Renderizado via JS -->
+        </div>
+      </div>
+
+      <!-- Grade Responsiva de Condimentos -->
+      <div id="vitrineGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Cards renderizados via JS -->
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- ABA PÚBLICA 2: MEUS PEDIDOS & RASTREIO                              -->
+    <!-- =================================================================== -->
+    <section id="view-meus-pedidos" class="hidden space-y-5">
+      <div class="bg-white rounded-2xl p-5 border border-yellow-200 shadow-2xs space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 class="text-lg sm:text-xl font-extrabold text-[#1F2937]">
+              Meus Pedidos & Rastreio
+            </h1>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Acompanhe o andamento da sua entrega ou envie o resumo do pedido diretamente no WhatsApp da loja.
+            </p>
+          </div>
+          <button
+            type="button"
+            onclick="switchTab('vitrine')"
+            class="px-4 py-2 rounded-xl bg-[#FACC15] hover:bg-yellow-400 text-[#1F2937] font-bold text-xs border border-yellow-400 cursor-pointer"
+          >
+            + Nova Compra
+          </button>
+        </div>
+
+        <!-- Busca por Código de Pedido -->
+        <div class="flex flex-col sm:flex-row gap-2">
+          <div class="relative flex-1">
+            <input
+              type="text"
+              id="myOrderSearchInput"
+              oninput="renderMyOrders()"
+              placeholder="Buscar por código de rastreio (ex: PED-2026-1001) ou nome..."
+              class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1F2937] focus:outline-none text-sm bg-[#FFFDF2]"
+            />
+            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.3-4.3"></path>
+            </svg>
+          </div>
+          <button
+            type="button"
+            onclick="document.getElementById('myOrderSearchInput').value=''; renderMyOrders();"
+            class="px-4 py-2.5 rounded-xl bg-[#FEFCE8] hover:bg-yellow-100 border border-yellow-300 text-xs font-bold text-[#1F2937] cursor-pointer"
+          >
+            Mostrar Todos
+          </button>
+        </div>
+      </div>
+
+      <div id="myOrdersListContainer" class="space-y-4">
+        <!-- Renderizado via JS -->
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- ABA ADMIN 1: PEDIDOS LOJA (GESTÃO DE RASTREIO & NOTIFICAÇÃO WPP)    -->
+    <!-- =================================================================== -->
+    <section id="view-admin-pedidos" class="hidden space-y-5">
+      <div class="bg-white rounded-2xl p-5 border border-yellow-300 shadow-2xs flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-[#15803D]">Painel Administrativo</span>
+          <h1 class="text-lg sm:text-xl font-extrabold text-[#1F2937]">
+            Pedidos da Loja & Notificação WhatsApp
+          </h1>
+          <p class="text-xs text-slate-500 mt-0.5">
+            Avance as etapas de separação/entrega e notifique o cliente diretamente no WhatsApp com um clique.
+          </p>
+        </div>
+
+        <input
+          type="text"
+          id="adminOrderSearchInput"
+          oninput="renderAdminOrders()"
+          placeholder="Filtrar por código, cliente ou WhatsApp..."
+          class="w-full sm:w-72 px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1F2937] focus:outline-none text-xs bg-[#FFFDF2]"
+        />
+      </div>
+
+      <div id="adminOrdersListContainer" class="space-y-4">
+        <!-- Renderizado via JS -->
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- ABA ADMIN 2: ESTOQUE & PRODUTOS (GALERIA CELULAR + REPOSIÇÃO WPP)   -->
+    <!-- =================================================================== -->
+    <section id="view-admin-estoque" class="hidden space-y-6">
+      <!-- Formulário Sempre Visível: Cadastrar Novo Produto -->
+      <div class="bg-white rounded-2xl p-5 sm:p-6 border border-yellow-300 shadow-2xs">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-yellow-100">
+          <div>
+            <h1 class="text-lg sm:text-xl font-extrabold text-[#1F2937]">
+              Cadastrar Novo Produto
+            </h1>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Adicione novos condimentos com foto da galeria do celular, preços de varejo/atacado, custo (CMV) e estoque inicial.
+            </p>
+          </div>
+          <span class="bg-[#FEFCE8] border border-yellow-300 text-[#1F2937] text-xs font-bold px-3 py-1 rounded-xl">
+            Cadastro Direto
+          </span>
+        </div>
+
+        <form id="newProductForm" onsubmit="handleCreateProduct(event)" novalidate class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+          <!-- Upload de Foto da Galeria do Celular -->
+          <div class="md:col-span-3 flex flex-col items-center justify-center bg-[#FFFDF2] border-2 border-dashed border-yellow-300 rounded-2xl p-4 text-center">
+            <div id="newProdPreviewBox" class="w-24 h-24 rounded-2xl bg-white border border-yellow-200 flex items-center justify-center overflow-hidden mb-2.5 shadow-2xs">
+              <span class="text-3xl">📷</span>
+            </div>
+
+            <label
+              for="newProdPhotoInput"
+              class="w-full inline-flex items-center justify-center gap-1.5 bg-[#FEFCE8] hover:bg-yellow-200/70 text-[#1F2937] border border-yellow-400 font-bold text-xs px-3 py-2.5 rounded-xl cursor-pointer transition"
+            >
+              <span>📱 Escolher Foto da Galeria</span>
+            </label>
+            <input
+              type="file"
+              id="newProdPhotoInput"
+              accept="image/*"
+              onchange="handleGalleryFileSelect(this, 'new')"
+              class="hidden"
+            />
+            <button
+              type="button"
+              id="btnClearNewPhoto"
+              onclick="clearNewProductPhoto()"
+              class="hidden mt-1.5 text-[11px] font-semibold text-red-600 hover:underline cursor-pointer"
+            >
+              Remover foto
+            </button>
+            <p class="text-[10px] text-slate-400 mt-1.5">Redimensionada automaticamente</p>
+          </div>
+
+          <!-- Campos do Produto -->
+          <div class="md:col-span-9 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+            <div class="sm:col-span-2">
+              <label for="newProdName" class="block text-xs font-bold text-[#1F2937] mb-1">Nome do Condimento *</label>
+              <input
+                type="text"
+                id="newProdName"
+                placeholder="Ex: Tempero Baiano Especial"
+                class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm bg-white"
+              />
+            </div>
+
+            <div>
+              <label for="newProdWeight" class="block text-xs font-bold text-[#1F2937] mb-1">Peso / Embalagem *</label>
+              <input
+                type="text"
+                id="newProdWeight"
+                placeholder="Ex: 100g, 500g, 1kg"
+                class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm bg-white"
+              />
+            </div>
+
+            <div>
+              <label for="newProdCategory" class="block text-xs font-bold text-[#1F2937] mb-1">Categoria *</label>
+              <select
+                id="newProdCategory"
+                class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm bg-white"
+              >
+                <option value="Temperos Secos">Temperos Secos</option>
+                <option value="Pimentas">Pimentas</option>
+                <option value="Ervas">Ervas</option>
+                <option value="Sais & Especiarias">Sais & Especiarias</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="newProdRetail" class="block text-xs font-bold text-[#1F2937] mb-1">Preço Varejo (1-4 un.) R$ *</label>
+              <input
+                type="text"
+                inputmode="decimal"
+                id="newProdRetail"
+                placeholder="Ex: 9,90"
+                class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm bg-white"
+              />
+            </div>
+
+            <div>
+              <label for="newProdWholesale" class="block text-xs font-bold text-[#1F2937] mb-1">Preço Atacado (5+ un.) R$ *</label>
+              <input
+                type="text"
+                inputmode="decimal"
+                id="newProdWholesale"
+                placeholder="Ex: 7,50"
+                class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm bg-white"
+              />
+            </div>
+
+            <div>
+              <label for="newProdCost" class="block text-xs font-bold text-[#1F2937] mb-1">Custo Unitário (CMV) R$ *</label>
+              <input
+                type="text"
+                inputmode="decimal"
+                id="newProdCost"
+                placeholder="Ex: 4,20"
+                class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm bg-white"
+              />
+            </div>
+
+            <div>
+              <label for="newProdStock" class="block text-xs font-bold text-[#1F2937] mb-1">Estoque Inicial *</label>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                id="newProdStock"
+                placeholder="Ex: 30"
+                class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm bg-white"
+              />
+            </div>
+
+            <div class="flex items-end justify-end">
+              <button
+                type="submit"
+                class="w-full bg-[#15803D] hover:bg-[#166534] active:scale-98 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-2xs transition cursor-pointer"
+              >
+                + Cadastrar Produto
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Lista de Produtos & Reposição via WhatsApp -->
+      <div class="bg-white rounded-2xl p-5 sm:p-6 border border-yellow-200 shadow-2xs space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+          <div>
+            <h2 class="text-base sm:text-lg font-extrabold text-[#1F2937]">
+              Produtos Cadastrados & Controle de Estoque
+            </h2>
+            <p class="text-xs text-slate-500">
+              Ajuste quantidades em tempo real ou edite fotos, preços e custos.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            <!-- Botão Pedir Reposição no WhatsApp -->
+            <button
+              type="button"
+              onclick="sendRestockRequestWhatsApp()"
+              class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#15803D] hover:bg-[#166534] text-white font-bold text-xs transition cursor-pointer shadow-2xs"
+            >
+              <span>📲 Pedir Reposição no WhatsApp</span>
+              <span id="lowStockCounterBadge" class="bg-white text-[#15803D] text-[10px] font-extrabold px-1.5 rounded-full">0</span>
+            </button>
+
+            <input
+              type="text"
+              id="stockSearchInput"
+              oninput="renderStockGrid()"
+              placeholder="Filtrar produto..."
+              class="flex-1 sm:w-56 px-3.5 py-2 rounded-xl border border-slate-200 focus:border-[#1F2937] focus:outline-none text-xs bg-[#FFFDF2]"
+            />
+          </div>
+        </div>
+
+        <div id="stockProductsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Renderizado via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- ABA ADMIN 3: FLUXO DE CAIXA SINCRONIZADO, TAXAS & LUCRO LÍQUIDO     -->
+    <!-- =================================================================== -->
+    <section id="view-admin-caixa" class="hidden space-y-6">
+      <!-- 4 Cards de KPIs Financeiros -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Entradas Brutas -->
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-emerald-200 shadow-2xs">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Entradas Brutas</span>
+          <p id="cashKpiGrossInflow" class="text-2xl font-extrabold text-[#15803D] mt-1.5">R$ 0,00</p>
+          <p id="cashKpiInflowCount" class="text-xs text-slate-500 mt-1">0 entradas</p>
+        </div>
+
+        <!-- Taxas & Saídas -->
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-red-200 shadow-2xs">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Taxas & Saídas</span>
+          <p id="cashKpiFeesAndOutflows" class="text-2xl font-extrabold text-red-600 mt-1.5">R$ 0,00</p>
+          <p id="cashKpiFeesDetail" class="text-xs text-slate-500 mt-1">Taxas: R$ 0,00 • Saídas: R$ 0,00</p>
+        </div>
+
+        <!-- Saldo Líquido em Caixa -->
+        <div class="bg-[#FEFCE8] rounded-2xl p-4 sm:p-5 border border-yellow-300 shadow-2xs">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-yellow-950/80">Saldo Líquido em Caixa</span>
+          <p id="cashKpiNetBalance" class="text-2xl font-extrabold text-[#1F2937] mt-1.5">R$ 0,00</p>
+          <p class="text-xs text-yellow-950/75 mt-1">Disponível após taxas e saídas</p>
+        </div>
+
+        <!-- Lucro Líquido Estimado (descontando CMV) -->
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-emerald-300 shadow-2xs">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-[#15803D]">Lucro Líquido Estimado</span>
+          <p id="cashKpiNetProfit" class="text-2xl font-extrabold text-[#15803D] mt-1.5">R$ 0,00</p>
+          <p id="cashKpiCmvDetail" class="text-xs text-slate-500 mt-1">CMV produtos: R$ 0,00</p>
+        </div>
+      </div>
+
+      <!-- Gráfico Comparativo Visual + Ação Resumo WhatsApp -->
+      <div class="bg-white rounded-2xl p-5 border border-yellow-200 shadow-2xs space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="text-sm sm:text-base font-extrabold text-[#1F2937]">
+              Comparativo Financeiro (Entradas vs. Taxas/Saídas vs. Lucro)
+            </h2>
+            <p class="text-xs text-slate-500">Visão proporcional sincronizada com as vendas e lançamentos do caixa.</p>
+          </div>
+          <button
+            type="button"
+            onclick="sendCashSummaryWhatsApp()"
+            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#15803D] hover:bg-[#166534] text-white font-bold text-xs transition cursor-pointer shadow-2xs"
+          >
+            📲 Enviar Resumo no WhatsApp
+          </button>
+        </div>
+
+        <div id="cashComparativeChart" class="space-y-3 pt-1">
+          <!-- Barras renderizadas via JS -->
+        </div>
+      </div>
+
+      <!-- Formulário de Lançamento Manual -->
+      <div class="bg-white rounded-2xl p-5 sm:p-6 border border-yellow-200 shadow-2xs">
+        <h2 class="text-base sm:text-lg font-extrabold text-[#1F2937] pb-3 mb-4 border-b border-slate-100">
+          Registrar Lançamento Manual (Entrada ou Saída)
+        </h2>
+
+        <form id="manualCashForm" onsubmit="handleCreateCashEntry(event)" novalidate class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3.5 items-end">
+          <div>
+            <label for="cashNewType" class="block text-xs font-bold text-[#1F2937] mb-1">Tipo *</label>
+            <select
+              id="cashNewType"
+              class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm font-semibold bg-white"
+            >
+              <option value="Entrada">Entrada (+)</option>
+              <option value="Saída">Saída (-)</option>
+            </select>
+          </div>
+
+          <div class="lg:col-span-2">
+            <label for="cashNewDesc" class="block text-xs font-bold text-[#1F2937] mb-1">Descrição *</label>
+            <input
+              type="text"
+              id="cashNewDesc"
+              placeholder="Ex: Compra de embalagens, Venda balcão..."
+              class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm"
+            />
+          </div>
+
+          <div>
+            <label for="cashNewCategory" class="block text-xs font-bold text-[#1F2937] mb-1">Categoria *</label>
+            <select
+              id="cashNewCategory"
+              class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm bg-white"
+            >
+              <option value="Venda Balcão">Venda Balcão</option>
+              <option value="Reposição de Estoque">Reposição de Estoque</option>
+              <option value="Embalagens & Frete">Embalagens & Frete</option>
+              <option value="Despesas Fixas">Despesas Fixas</option>
+              <option value="Outros">Outros</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="cashNewPayment" class="block text-xs font-bold text-[#1F2937] mb-1">Pagamento *</label>
+            <select
+              id="cashNewPayment"
+              onchange="updateManualDefaultFee()"
+              class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm bg-white"
+            >
+              <option value="PIX">PIX</option>
+              <option value="Dinheiro">Dinheiro</option>
+              <option value="Cartão de Débito">Cartão de Débito</option>
+              <option value="Cartão de Crédito">Cartão de Crédito</option>
+              <option value="Transferência">Transferência</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="cashNewAmount" class="block text-xs font-bold text-[#1F2937] mb-1">Valor Bruto R$ *</label>
+            <input
+              type="text"
+              inputmode="decimal"
+              id="cashNewAmount"
+              placeholder="Ex: 85,00"
+              class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm font-bold"
+            />
+          </div>
+
+          <div>
+            <label for="cashNewFeePercent" class="block text-xs font-bold text-[#1F2937] mb-1">Taxa (%)</label>
+            <input
+              type="text"
+              inputmode="decimal"
+              id="cashNewFeePercent"
+              value="0"
+              class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm"
+            />
+          </div>
+
+          <div class="lg:col-span-2">
+            <label for="cashNewDate" class="block text-xs font-bold text-[#1F2937] mb-1">Data e Hora</label>
+            <input
+              type="datetime-local"
+              id="cashNewDate"
+              class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm bg-white"
+            />
+          </div>
+
+          <div class="sm:col-span-2 lg:col-span-3 flex justify-end">
+            <button
+              type="submit"
+              class="w-full sm:w-auto bg-[#15803D] hover:bg-[#166534] text-white font-bold text-sm px-6 py-2.5 rounded-xl transition cursor-pointer"
+            >
+              + Registrar Lançamento
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Extrato de Movimentações Editável -->
+      <div class="bg-white rounded-2xl p-5 sm:p-6 border border-yellow-200 shadow-2xs space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+          <div>
+            <h2 class="text-base sm:text-lg font-extrabold text-[#1F2937]">
+              Extrato de Movimentações
+            </h2>
+            <p class="text-xs text-slate-500">
+              Edite valores brutos, taxas, datas ou descrições de qualquer lançamento automático ou manual.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <input
+              type="text"
+              id="cashSearchInput"
+              oninput="renderCashFlow()"
+              placeholder="Buscar no extrato..."
+              class="px-3 py-1.5 rounded-xl border border-slate-200 focus:border-[#1F2937] focus:outline-none text-xs bg-[#FFFDF2]"
+            />
+
+            <div class="inline-flex rounded-xl bg-[#FEFCE8] p-1 border border-yellow-200">
+              <button type="button" onclick="setCashFilter('Todos')" id="cfilter-Todos" class="px-3 py-1 rounded-lg text-xs font-bold bg-[#1F2937] text-[#FACC15] cursor-pointer">
+                Todos
+              </button>
+              <button type="button" onclick="setCashFilter('Entrada')" id="cfilter-Entrada" class="px-3 py-1 rounded-lg text-xs font-bold text-[#1F2937] cursor-pointer">
+                Entradas
+              </button>
+              <button type="button" onclick="setCashFilter('Saída')" id="cfilter-Saída" class="px-3 py-1 rounded-lg text-xs font-bold text-[#1F2937] cursor-pointer">
+                Saídas
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onclick="exportCashCSV()"
+              class="px-3.5 py-1.5 rounded-xl bg-[#FACC15] hover:bg-yellow-400 text-[#1F2937] font-bold text-xs border border-yellow-400 cursor-pointer"
+            >
+              Exportar CSV
+            </button>
+          </div>
+        </div>
+
+        <div id="cashEntriesList" class="divide-y divide-slate-100">
+          <!-- Renderizado via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- ABA ADMIN 4: CONFIGURAÇÕES DA LOJA & BACKUP JSON                    -->
+    <!-- =================================================================== -->
+    <section id="view-admin-config" class="hidden space-y-6">
+      <!-- Formulário de Configurações da Loja -->
+      <div class="bg-white rounded-2xl p-5 sm:p-6 border border-yellow-300 shadow-2xs">
+        <div class="pb-3 mb-4 border-b border-yellow-100">
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-[#15803D]">Identidade, WhatsApp, Taxas & Segurança</span>
+          <h1 class="text-lg sm:text-xl font-extrabold text-[#1F2937]">
+            Configurações da Loja
+          </h1>
+        </div>
+
+        <form id="storeSettingsForm" onsubmit="handleSaveSettings(event)" novalidate class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <label for="cfgStoreName" class="block text-xs font-bold text-[#1F2937] mb-1">Nome da Loja *</label>
+              <input type="text" id="cfgStoreName" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm" />
+            </div>
+
+            <div>
+              <label for="cfgStoreWhatsApp" class="block text-xs font-bold text-[#1F2937] mb-1">WhatsApp Oficial da Loja (com DDD) *</label>
+              <input
+                type="text"
+                id="cfgStoreWhatsApp"
+                oninput="maskPhoneInput(this)"
+                placeholder="(41) 99999-9999"
+                class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm font-bold"
+              />
+            </div>
+
+            <div>
+              <label for="cfgPixKey" class="block text-xs font-bold text-[#1F2937] mb-1">Chave PIX da Loja *</label>
+              <input
+                type="text"
+                id="cfgPixKey"
+                placeholder="CNPJ, E-mail, Celular ou Chave Aleatória"
+                class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm"
+              />
+            </div>
+          </div>
+
+          <!-- Taxas por Meio de Pagamento -->
+          <div class="bg-[#FFFDF2] p-4 rounded-2xl border border-yellow-200 space-y-3">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-[#1F2937]">
+              Taxas por Meio de Pagamento (%)
+            </h3>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div>
+                <label for="cfgFeePix" class="block text-xs font-bold text-slate-600 mb-1">PIX (%)</label>
+                <input type="text" inputmode="decimal" id="cfgFeePix" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm font-bold" />
+              </div>
+              <div>
+                <label for="cfgFeeCash" class="block text-xs font-bold text-slate-600 mb-1">Dinheiro (%)</label>
+                <input type="text" inputmode="decimal" id="cfgFeeCash" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm font-bold" />
+              </div>
+              <div>
+                <label for="cfgFeeDebit" class="block text-xs font-bold text-slate-600 mb-1">Cartão Débito (%)</label>
+                <input type="text" inputmode="decimal" id="cfgFeeDebit" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm font-bold" />
+              </div>
+              <div>
+                <label for="cfgFeeCredit" class="block text-xs font-bold text-slate-600 mb-1">Cartão Crédito (%)</label>
+                <input type="text" inputmode="decimal" id="cfgFeeCredit" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm font-bold" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Senha de Administrador -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+            <div>
+              <label for="cfgAdminPassword" class="block text-xs font-bold text-[#1F2937] mb-1">Senha da Área Admin *</label>
+              <input type="text" id="cfgAdminPassword" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm font-bold" />
+            </div>
+
+            <div class="flex justify-end">
+              <button
+                type="submit"
+                class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#15803D] hover:bg-[#166534] text-white font-bold text-sm cursor-pointer transition"
+              >
+                Salvar Configurações
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Backup Completo JSON & Restauração -->
+      <div class="bg-white rounded-2xl p-5 sm:p-6 border border-yellow-200 shadow-2xs space-y-4">
+        <div>
+          <h2 class="text-base sm:text-lg font-extrabold text-[#1F2937]">
+            Backup & Restauração Completa (.JSON)
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">
+            Exporte todos os produtos, fotos, pedidos, clientes, configurações e lançamentos do caixa em um arquivo seguro para transferir de dispositivo ou restaurar quando precisar.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <!-- Exportar JSON -->
+          <button
+            type="button"
+            onclick="exportFullBackupJSON()"
+            class="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#FACC15] hover:bg-yellow-400 text-[#1F2937] font-extrabold text-xs sm:text-sm border border-yellow-400 cursor-pointer transition"
+          >
+            ⬇️ Exportar Backup Completo (.json)
+          </button>
+
+          <!-- Importar JSON -->
+          <label
+            for="importBackupFileInput"
+            class="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#FEFCE8] hover:bg-yellow-100 text-[#1F2937] font-extrabold text-xs sm:text-sm border border-yellow-300 cursor-pointer transition"
+          >
+            ⬆️ Importar / Restaurar Backup (.json)
+          </label>
+          <input
+            type="file"
+            id="importBackupFileInput"
+            accept=".json,application/json"
+            onchange="handleImportBackupJSON(this)"
+            class="hidden"
+          />
+
+          <!-- Restaurar Padrão de Fábrica -->
+          <button
+            type="button"
+            onclick="askFactoryReset()"
+            class="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 font-extrabold text-xs sm:text-sm border border-red-200 cursor-pointer transition"
+          >
+            🔄 Restaurar Dados de Fábrica
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- BOTÃO FLUTUANTE WHATSAPP (CANTO INFERIOR DIREITO)                     -->
+  <!-- ===================================================================== -->
+  <div id="floatingWhatsAppWrapper" class="fixed bottom-4 right-4 z-40 flex flex-col items-end gap-2">
+    <!-- Menu Rápido WhatsApp -->
+    <div
+      id="whatsappQuickMenu"
+      class="hidden bg-white rounded-2xl border border-emerald-200 shadow-xl p-3 w-64 space-y-1.5 toast-anim"
+    >
+      <div class="pb-1.5 border-b border-slate-100 flex items-center justify-between">
+        <span class="text-xs font-extrabold text-[#1F2937]">Atendimento WhatsApp</span>
+        <button type="button" onclick="toggleWhatsAppMenu(false)" class="text-xs font-bold text-slate-400 hover:text-slate-700 cursor-pointer">✕</button>
+      </div>
+
+      <button
+        type="button"
+        onclick="openStoreQuickWhatsApp('atacado')"
+        class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-[#1F2937] hover:bg-emerald-50 transition cursor-pointer"
+      >
+        📦 Dúvidas sobre Atacado (5+ un.)
+      </button>
+
+      <button
+        type="button"
+        onclick="openStoreQuickWhatsApp('entrega')"
+        class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-[#1F2937] hover:bg-emerald-50 transition cursor-pointer"
+      >
+        🚚 Prazo e Frete de Entrega
+      </button>
+
+      <button
+        type="button"
+        onclick="openStoreQuickWhatsApp('vendedor')"
+        class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-[#15803D] bg-emerald-50/70 hover:bg-emerald-100 transition cursor-pointer"
+      >
+        💬 Falar com Vendedor
+      </button>
+    </div>
+
+    <!-- Botão Principal Flutuante -->
+    <button
+      type="button"
+      onclick="toggleWhatsAppMenu()"
+      class="flex items-center gap-2 bg-[#15803D] hover:bg-[#166534] active:scale-95 text-white font-extrabold text-xs sm:text-sm px-4 py-3 rounded-full shadow-lg border-2 border-white transition cursor-pointer"
+      aria-label="Atendimento via WhatsApp"
+    >
+      <svg class="w-5 h-5 fill-current shrink-0" viewBox="0 0 24 24">
+        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824z"/>
+      </svg>
+      <span>WhatsApp</span>
+    </button>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- RODAPÉ                                                                -->
+  <!-- ===================================================================== -->
+  <footer class="border-t border-yellow-200 bg-[#FEFCE8] py-4 px-4 text-center text-xs text-slate-600">
+    <span id="footerStoreName">Atacadão dos Condimentos</span> • E-Commerce, Atendimento WhatsApp, Controle de Estoque & Fluxo de Caixa
+  </footer>
+
+  <!-- ===================================================================== -->
+  <!-- DRAWER LATERAL DO CARRINHO + FRETE POR CEP + FINALIZAÇÃO              -->
+  <!-- ===================================================================== -->
+  <div id="cartDrawerOverlay" class="fixed inset-0 z-50 hidden">
+    <div onclick="toggleCart(false)" class="fixed inset-0 bg-black/45"></div>
+
+    <aside class="fixed right-0 top-0 bottom-0 w-full max-w-lg bg-white shadow-2xl border-l border-yellow-300 flex flex-col drawer-slide z-10">
+      <div class="bg-[#FACC15] px-5 py-3.5 border-b border-yellow-400 flex items-center justify-between shrink-0">
+        <div>
+          <h2 class="font-extrabold text-base sm:text-lg text-[#1F2937]">Carrinho & Finalização</h2>
+          <p class="text-[11px] font-medium text-yellow-950/80">5+ un. do mesmo item = Preço de Atacado</p>
+        </div>
+        <button
+          type="button"
+          onclick="toggleCart(false)"
+          class="w-9 h-9 rounded-xl bg-white/85 hover:bg-white text-[#1F2937] font-bold flex items-center justify-center cursor-pointer"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-4 space-y-4 bg-[#FFFDF2]">
+        <div id="cartItemsContainer" class="space-y-2.5"></div>
+
+        <div id="cartCheckoutSection" class="hidden space-y-4">
+          <!-- Cálculo de Frete por CEP -->
+          <div class="bg-white rounded-2xl p-4 border border-yellow-200 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-extrabold uppercase tracking-wider text-[#1F2937]">
+                🚚 Cálculo de Frete por CEP
+              </h3>
+              <span id="shippingFreeGoalBadge" class="text-[11px] font-semibold text-[#15803D]"></span>
+            </div>
+
+            <div class="flex gap-2">
+              <input
+                type="text"
+                id="cartCepInput"
+                maxlength="9"
+                oninput="maskCepInput(this)"
+                placeholder="00000-000"
+                class="flex-1 px-3 py-2 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm font-bold bg-[#FFFDF2]"
+              />
+              <button
+                type="button"
+                id="btnCalcShipping"
+                onclick="calculateShippingByCep()"
+                class="px-4 py-2 rounded-xl bg-[#FACC15] hover:bg-yellow-400 text-[#1F2937] font-extrabold text-xs border border-yellow-400 cursor-pointer shrink-0"
+              >
+                Calcular
+              </button>
+            </div>
+
+            <div id="cartCepLocationInfo" class="hidden text-xs bg-[#FEFCE8] text-[#1F2937] px-3 py-2 rounded-xl border border-yellow-200 font-medium"></div>
+            <div id="shippingOptionsBox" class="space-y-2"></div>
+          </div>
+
+          <!-- Dados do Cliente, WhatsApp & Pagamento -->
+          <div class="bg-white rounded-2xl p-4 border border-yellow-200 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-extrabold uppercase tracking-wider text-[#1F2937]">
+                📍 Dados para Entrega & Pagamento
+              </h3>
+              <button
+                type="button"
+                id="btnCartQuickLogin"
+                onclick="toggleCart(false); openAuthModal('login')"
+                class="text-[11px] font-bold text-[#15803D] hover:underline cursor-pointer"
+              >
+                Entrar na conta
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div>
+                <label for="checkoutCustomerName" class="block text-[11px] font-bold text-slate-600 mb-1">Nome do Cliente *</label>
+                <input
+                  type="text"
+                  id="checkoutCustomerName"
+                  placeholder="Seu nome completo"
+                  class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-xs font-semibold"
+                />
+              </div>
+
+              <div>
+                <label for="checkoutCustomerWhatsApp" class="block text-[11px] font-bold text-slate-600 mb-1">WhatsApp do Cliente *</label>
+                <input
+                  type="text"
+                  id="checkoutCustomerWhatsApp"
+                  oninput="maskPhoneInput(this)"
+                  placeholder="(41) 99999-0000"
+                  class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-xs font-semibold"
+                />
+              </div>
+
+              <div class="sm:col-span-2">
+                <label for="checkoutCustomerAddress" class="block text-[11px] font-bold text-slate-600 mb-1">Endereço Completo (Rua, Nº, Bairro, Cidade/UF) *</label>
+                <input
+                  type="text"
+                  id="checkoutCustomerAddress"
+                  placeholder="Ex: Rua das Flores, 120 - Centro, Curitiba/PR"
+                  class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-xs"
+                />
+              </div>
+
+              <div class="sm:col-span-2">
+                <label for="checkoutPaymentMethod" class="block text-[11px] font-bold text-slate-600 mb-1">Forma de Pagamento *</label>
+                <select
+                  id="checkoutPaymentMethod"
+                  class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-xs font-bold bg-white"
+                >
+                  <option value="PIX">PIX (Aprovação Imediata)</option>
+                  <option value="Dinheiro">Dinheiro na Entrega / Retirada</option>
+                  <option value="Cartão de Débito">Cartão de Débito</option>
+                  <option value="Cartão de Crédito">Cartão de Crédito</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rodapé Fixo Carrinho -->
+      <div class="p-4 bg-white border-t border-yellow-200 space-y-2.5 shrink-0">
+        <div class="space-y-1 text-xs">
+          <div class="flex justify-between text-slate-600">
+            <span>Subtotal dos Produtos:</span>
+            <span id="cartSubtotalDisplay" class="font-bold text-[#1F2937]">R$ 0,00</span>
+          </div>
+          <div id="cartWholesaleSavingsRow" class="hidden flex justify-between text-[#15803D] font-bold">
+            <span>Economia no Atacado (5+ un.):</span>
+            <span id="cartWholesaleSavingsDisplay">- R$ 0,00</span>
+          </div>
+          <div class="flex justify-between text-slate-600">
+            <span>Frete Selecionado:</span>
+            <span id="cartShippingDisplay" class="font-bold text-[#1F2937]">R$ 0,00</span>
+          </div>
+          <div class="flex justify-between items-center pt-1.5 border-t border-slate-100">
+            <span class="font-extrabold text-sm text-[#1F2937]">Total do Pedido:</span>
+            <span id="cartGrandTotalDisplay" class="text-xl font-extrabold text-[#1F2937]">R$ 0,00</span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          id="btnFinalizeOrder"
+          onclick="finalizeOrder()"
+          class="w-full bg-[#15803D] hover:bg-[#166534] disabled:bg-slate-300 disabled:text-slate-500 text-white font-extrabold py-3 px-4 rounded-xl text-sm transition cursor-pointer shadow-2xs"
+        >
+          Finalizar Pedido
+        </button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 1: LOGIN ADMINISTRATIVO (RBAC)                                  -->
+  <!-- ===================================================================== -->
+  <div id="adminLoginModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/50">
+    <div class="bg-white rounded-2xl max-w-sm w-full border border-yellow-300 shadow-xl overflow-hidden">
+      <div class="bg-[#FACC15] px-5 py-3.5 flex items-center justify-between border-b border-yellow-400">
+        <span class="font-extrabold text-base text-[#1F2937]">🔒 Acesso à Área Admin</span>
+        <button type="button" onclick="closeAdminLoginModal()" class="w-8 h-8 rounded-xl bg-white/80 hover:bg-white font-bold text-sm cursor-pointer">✕</button>
+      </div>
+
+      <form onsubmit="handleAdminLoginSubmit(event)" novalidate class="p-5 space-y-4">
+        <p class="text-xs text-slate-600">
+          Área restrita para gestão de pedidos, controle de estoque, fluxo de caixa e configurações da loja.
+        </p>
+
+        <div>
+          <label for="adminPasswordInput" class="block text-xs font-bold text-[#1F2937] mb-1">Senha de Administrador</label>
+          <input
+            type="password"
+            id="adminPasswordInput"
+            placeholder="Digite a senha (padrão: admin123)"
+            class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm"
+          />
+        </div>
+
+        <button
+          type="submit"
+          class="w-full bg-[#1F2937] hover:bg-slate-800 text-[#FACC15] font-extrabold py-2.5 rounded-xl text-sm transition cursor-pointer"
+        >
+          Desbloquear Painel Admin
+        </button>
+
+        <div class="pt-2 border-t border-slate-100">
+          <button
+            type="button"
+            onclick="loginAsAdminDemo()"
+            class="w-full bg-[#FEFCE8] hover:bg-yellow-100 text-[#1F2937] border border-yellow-300 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer"
+          >
+            ⚡ Entrar como Admin (Demo)
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 2: AUTENTICAÇÃO DE CLIENTE (LOGIN / CADASTRO COM VIACEP)        -->
+  <!-- ===================================================================== -->
+  <div id="authModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/50 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-md w-full border border-yellow-300 shadow-xl overflow-hidden my-auto">
+      <div class="bg-[#FACC15] px-5 py-3.5 flex items-center justify-between border-b border-yellow-400">
+        <span class="font-extrabold text-base text-[#1F2937]">Conta do Cliente</span>
+        <button type="button" onclick="closeAuthModal()" class="w-8 h-8 rounded-xl bg-white/80 hover:bg-white font-bold text-sm cursor-pointer">✕</button>
+      </div>
+
+      <div class="p-5 space-y-4">
+        <div class="grid grid-cols-2 gap-1.5 bg-[#FEFCE8] p-1 rounded-xl border border-yellow-200">
+          <button type="button" id="authTabLogin" onclick="switchAuthMode('login')" class="py-2 rounded-lg text-xs font-extrabold bg-[#1F2937] text-[#FACC15] cursor-pointer">
+            Entrar
+          </button>
+          <button type="button" id="authTabRegister" onclick="switchAuthMode('register')" class="py-2 rounded-lg text-xs font-extrabold text-[#1F2937] cursor-pointer">
+            Criar Conta
+          </button>
+        </div>
+
+        <!-- Login -->
+        <form id="loginForm" onsubmit="handleLoginSubmit(event)" novalidate class="space-y-3">
+          <div>
+            <label for="loginContact" class="block text-xs font-bold text-[#1F2937] mb-1">E-mail ou WhatsApp *</label>
+            <input type="text" id="loginContact" placeholder="cliente@exemplo.com ou (41) 99999-0000" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm" />
+          </div>
+          <div>
+            <label for="loginPassword" class="block text-xs font-bold text-[#1F2937] mb-1">Senha *</label>
+            <input type="password" id="loginPassword" placeholder="Digite sua senha" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm" />
+          </div>
+
+          <button type="submit" class="w-full bg-[#15803D] hover:bg-[#166534] text-white font-bold py-2.5 rounded-xl text-sm transition cursor-pointer">
+            Entrar na Conta
+          </button>
+
+          <div class="pt-2 border-t border-slate-100">
+            <button type="button" onclick="loginWithTestAccount()" class="w-full bg-[#FEFCE8] hover:bg-yellow-100 text-[#1F2937] border border-yellow-300 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer">
+              ⚡ Entrar com Conta Teste (1 Clique)
+            </button>
+          </div>
+        </form>
+
+        <!-- Cadastro -->
+        <form id="registerForm" onsubmit="handleRegisterSubmit(event)" novalidate class="hidden space-y-3">
+          <div>
+            <label for="regName" class="block text-xs font-bold text-[#1F2937] mb-1">Nome Completo *</label>
+            <input type="text" id="regName" placeholder="Ex: Maria Oliveira" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm" />
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div>
+              <label for="regWhatsapp" class="block text-xs font-bold text-[#1F2937] mb-1">WhatsApp *</label>
+              <input type="text" id="regWhatsapp" oninput="maskPhoneInput(this)" placeholder="(41) 98888-7777" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm" />
+            </div>
+            <div>
+              <label for="regEmail" class="block text-xs font-bold text-[#1F2937] mb-1">E-mail *</label>
+              <input type="email" id="regEmail" placeholder="maria@email.com" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-5 gap-2">
+            <div class="col-span-2">
+              <label for="regCep" class="block text-xs font-bold text-[#1F2937] mb-1">CEP *</label>
+              <input type="text" id="regCep" maxlength="9" oninput="handleRegisterCepInput(this)" placeholder="00000-000" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm font-bold" />
+            </div>
+            <div class="col-span-3 flex items-end">
+              <span id="regCepStatus" class="text-[11px] text-slate-500 pb-2">Digite o CEP para buscar endereço</span>
+            </div>
+          </div>
+
+          <div>
+            <label for="regAddress" class="block text-xs font-bold text-[#1F2937] mb-1">Endereço Completo *</label>
+            <input type="text" id="regAddress" placeholder="Rua, Número, Bairro, Cidade - UF" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm" />
+          </div>
+
+          <div>
+            <label for="regPassword" class="block text-xs font-bold text-[#1F2937] mb-1">Senha *</label>
+            <input type="password" id="regPassword" placeholder="Crie uma senha" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm" />
+          </div>
+
+          <button type="submit" class="w-full bg-[#15803D] hover:bg-[#166534] text-white font-bold py-2.5 rounded-xl text-sm transition cursor-pointer">
+            Criar Conta e Entrar
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 3: CONFIRMAÇÃO DE PEDIDO COM ENVIO PARA WHATSAPP DA LOJA        -->
+  <!-- ===================================================================== -->
+  <div id="orderSuccessModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/50">
+    <div id="orderSuccessContent" class="bg-white rounded-2xl max-w-md w-full p-6 border border-yellow-300 shadow-xl text-center space-y-4"></div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 4: EDITAR PRODUTO (COM UPLOAD DE FOTO DA GALERIA)               -->
+  <!-- ===================================================================== -->
+  <div id="editProductModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/50 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-lg w-full border border-yellow-300 shadow-xl overflow-hidden my-auto">
+      <div class="bg-[#FACC15] px-5 py-3.5 flex items-center justify-between border-b border-yellow-400">
+        <h3 class="font-extrabold text-base text-[#1F2937]">Editar Produto</h3>
+        <button type="button" onclick="closeEditProductModal()" class="w-8 h-8 rounded-xl bg-white/80 hover:bg-white font-bold text-sm cursor-pointer">✕</button>
+      </div>
+
+      <form id="editProductForm" onsubmit="handleSaveEditedProduct(event)" novalidate class="p-5 space-y-4">
+        <input type="hidden" id="editProdId" />
+
+        <div class="flex flex-col sm:flex-row items-center gap-4 bg-[#FFFDF2] p-3.5 rounded-2xl border border-yellow-200">
+          <div id="editProdPreviewBox" class="w-20 h-20 rounded-2xl bg-white border border-yellow-200 flex items-center justify-center overflow-hidden shrink-0"></div>
+          <div class="flex-1 text-center sm:text-left space-y-1.5">
+            <p class="text-xs font-bold text-[#1F2937]">Foto do Produto</p>
+            <div class="flex flex-wrap justify-center sm:justify-start gap-2">
+              <label for="editProdPhotoInput" class="inline-flex items-center gap-1 bg-[#FEFCE8] hover:bg-yellow-200/70 text-[#1F2937] border border-yellow-400 font-bold text-xs px-3 py-2 rounded-xl cursor-pointer">
+                📱 Escolher Foto da Galeria
+              </label>
+              <input type="file" id="editProdPhotoInput" accept="image/*" onchange="handleGalleryFileSelect(this, 'edit')" class="hidden" />
+              <button type="button" onclick="restoreDefaultProductIllustration()" class="text-xs font-semibold text-slate-600 hover:text-red-600 px-2.5 py-2 rounded-xl border border-slate-200 bg-white cursor-pointer">
+                Ilustração Padrão
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="sm:col-span-2">
+            <label for="editProdName" class="block text-xs font-bold text-[#1F2937] mb-1">Nome do Condimento *</label>
+            <input type="text" id="editProdName" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm" />
+          </div>
+
+          <div>
+            <label for="editProdCategory" class="block text-xs font-bold text-[#1F2937] mb-1">Categoria *</label>
+            <select id="editProdCategory" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm bg-white">
+              <option value="Temperos Secos">Temperos Secos</option>
+              <option value="Pimentas">Pimentas</option>
+              <option value="Ervas">Ervas</option>
+              <option value="Sais & Especiarias">Sais & Especiarias</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="editProdWeight" class="block text-xs font-bold text-[#1F2937] mb-1">Peso / Embalagem *</label>
+            <input type="text" id="editProdWeight" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm" />
+          </div>
+
+          <div>
+            <label for="editProdRetail" class="block text-xs font-bold text-[#1F2937] mb-1">Preço Varejo R$ *</label>
+            <input type="text" inputmode="decimal" id="editProdRetail" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm" />
+          </div>
+
+          <div>
+            <label for="editProdWholesale" class="block text-xs font-bold text-[#1F2937] mb-1">Preço Atacado (5+ un.) R$ *</label>
+            <input type="text" inputmode="decimal" id="editProdWholesale" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm" />
+          </div>
+
+          <div>
+            <label for="editProdCost" class="block text-xs font-bold text-[#1F2937] mb-1">Custo Unitário (CMV) R$ *</label>
+            <input type="text" inputmode="decimal" id="editProdCost" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm" />
+          </div>
+
+          <div>
+            <label for="editProdStock" class="block text-xs font-bold text-[#1F2937] mb-1">Quantidade em Estoque *</label>
+            <input type="number" min="0" step="1" id="editProdStock" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm font-bold" />
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onclick="closeEditProductModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 cursor-pointer">
+            Cancelar
+          </button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-[#15803D] hover:bg-[#166534] text-xs font-bold text-white cursor-pointer">
+            Salvar Alterações
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 5: EDITAR LANÇAMENTO DO FLUXO DE CAIXA                          -->
+  <!-- ===================================================================== -->
+  <div id="editCashModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/50 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-md w-full border border-yellow-300 shadow-xl overflow-hidden my-auto">
+      <div class="bg-[#FACC15] px-5 py-3.5 flex items-center justify-between border-b border-yellow-400">
+        <h3 class="font-extrabold text-base text-[#1F2937]">Editar Lançamento do Caixa</h3>
+        <button type="button" onclick="closeEditCashModal()" class="w-8 h-8 rounded-xl bg-white/80 hover:bg-white font-bold text-sm cursor-pointer">✕</button>
+      </div>
+
+      <form id="editCashForm" onsubmit="handleSaveEditedCash(event)" novalidate class="p-5 space-y-3.5">
+        <input type="hidden" id="editCashId" />
+
+        <div class="grid grid-cols-3 gap-2.5">
+          <div>
+            <label for="editCashType" class="block text-xs font-bold text-[#1F2937] mb-1">Tipo *</label>
+            <select id="editCashType" class="w-full px-2.5 py-2 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-xs font-bold bg-white">
+              <option value="Entrada">Entrada (+)</option>
+              <option value="Saída">Saída (-)</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="editCashGross" class="block text-xs font-bold text-[#1F2937] mb-1">Valor Bruto *</label>
+            <input type="text" inputmode="decimal" id="editCashGross" class="w-full px-2.5 py-2 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-xs font-extrabold" />
+          </div>
+
+          <div>
+            <label for="editCashFeePercent" class="block text-xs font-bold text-[#1F2937] mb-1">Taxa (%)</label>
+            <input type="text" inputmode="decimal" id="editCashFeePercent" class="w-full px-2.5 py-2 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-xs font-bold" />
+          </div>
+        </div>
+
+        <div>
+          <label for="editCashDesc" class="block text-xs font-bold text-[#1F2937] mb-1">Descrição *</label>
+          <input type="text" id="editCashDesc" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="editCashCategory" class="block text-xs font-bold text-[#1F2937] mb-1">Categoria *</label>
+            <select id="editCashCategory" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm bg-white">
+              <option value="Venda E-Commerce">Venda E-Commerce</option>
+              <option value="Venda Balcão">Venda Balcão</option>
+              <option value="Reposição de Estoque">Reposição de Estoque</option>
+              <option value="Embalagens & Frete">Embalagens & Frete</option>
+              <option value="Despesas Fixas">Despesas Fixas</option>
+              <option value="Outros">Outros</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="editCashPayment" class="block text-xs font-bold text-[#1F2937] mb-1">Pagamento *</label>
+            <select id="editCashPayment" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm bg-white">
+              <option value="PIX">PIX</option>
+              <option value="Dinheiro">Dinheiro</option>
+              <option value="Cartão de Débito">Cartão de Débito</option>
+              <option value="Cartão de Crédito">Cartão de Crédito</option>
+              <option value="Transferência">Transferência</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label for="editCashDate" class="block text-xs font-bold text-[#1F2937] mb-1">Data e Hora *</label>
+          <input type="datetime-local" id="editCashDate" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-[#1F2937] focus:outline-none text-sm bg-white" />
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onclick="closeEditCashModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 cursor-pointer">
+            Cancelar
+          </button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-[#15803D] hover:bg-[#166534] text-xs font-bold text-white cursor-pointer">
+            Salvar Lançamento
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 6: CONFIRMAÇÃO GENÉRICA (SEM USAR window.confirm)               -->
+  <!-- ===================================================================== -->
+  <div id="confirmDialogModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/50">
+    <div id="confirmDialogContent" class="bg-white rounded-2xl max-w-sm w-full p-5 border border-yellow-300 shadow-xl space-y-4"></div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- ÁREA DE NOTIFICAÇÕES TOAST                                            -->
+  <!-- ===================================================================== -->
+  <div id="toastContainer" class="fixed bottom-20 right-4 z-50 flex flex-col gap-2 max-w-sm w-full px-4 sm:px-0 pointer-events-none"></div>
+
+  <!-- ===================================================================== -->
+  <!-- JAVASCRIPT DA APLICAÇÃO                                               -->
+  <!-- ===================================================================== -->
+  <script>
+    // =========================================================================
+    // 1. CONSTANTES E CHAVES DE ARMAZENAMENTO
+    // =========================================================================
+    const STORAGE_KEYS = {
+      PRODUCTS: 'atacadao_cond_v3_products',
+      CASH: 'atacadao_cond_v3_cash',
+      ORDERS: 'atacadao_cond_v3_orders',
+      USERS: 'atacadao_cond_v3_users',
+      SESSION: 'atacadao_cond_v3_session',
+      CART: 'atacadao_cond_v3_cart',
+      SETTINGS: 'atacadao_cond_v3_settings',
+      ADMIN_AUTH: 'atacadao_cond_v3_admin_auth'
+    };
+
+    const CATEGORIES = ['Todos', 'Temperos Secos', 'Pimentas', 'Ervas', 'Sais & Especiarias'];
+
+    const ORDER_STEPS = [
+      'Pedido Confirmado',
+      'Em Separação no Estoque',
+      'Saiu para Entrega',
+      'Entregue'
+    ];
+
+    const DEFAULT_SETTINGS = {
+      storeName: 'Atacadão dos Condimentos',
+      storeWhatsApp: '(41) 99999-8888',
+      pixKey: 'financeiro@atacadaocondimentos.com.br',
+      adminPassword: 'admin123',
+      fees: {
+        'PIX': 0,
+        'Dinheiro': 0,
+        'Cartão de Débito': 1.5,
+        'Cartão de Crédito': 3.5,
+        'Transferência': 0
+      }
+    };
+
+    // 8 Condimentos Pré-Cadastrados com Varejo, Atacado e CMV (Custo)
+    const INITIAL_PRODUCTS = [
+      {
+        id: 'prod-1',
+        name: 'Páprica Defumada Premium',
+        weight: '100g',
+        category: 'Temperos Secos',
+        retailPrice: 9.90,
+        wholesalePrice: 7.50,
+        costPrice: 4.20,
+        stock: 45,
+        themeColor: '#DC2626',
+        accentColor: '#FEE2E2',
+        imageData: null
+      },
+      {
+        id: 'prod-2',
+        name: 'Orégano Chileno Selecionado',
+        weight: '50g',
+        category: 'Ervas',
+        retailPrice: 6.50,
+        wholesalePrice: 4.90,
+        costPrice: 2.60,
+        stock: 60,
+        themeColor: '#15803D',
+        accentColor: '#DCFCE7',
+        imageData: null
+      },
+      {
+        id: 'prod-3',
+        name: 'Pimenta-do-Reino Preta Moída',
+        weight: '100g',
+        category: 'Pimentas',
+        retailPrice: 11.90,
+        wholesalePrice: 8.90,
+        costPrice: 5.10,
+        stock: 35,
+        themeColor: '#374151',
+        accentColor: '#F3F4F6',
+        imageData: null
+      },
+      {
+        id: 'prod-4',
+        name: 'Açafrão-da-Terra (Cúrcuma) Puro',
+        weight: '100g',
+        category: 'Temperos Secos',
+        retailPrice: 8.50,
+        wholesalePrice: 6.20,
+        costPrice: 3.40,
+        stock: 50,
+        themeColor: '#D97706',
+        accentColor: '#FEF3C7',
+        imageData: null
+      },
+      {
+        id: 'prod-5',
+        name: 'Lemon Pepper Tempero Cítrico',
+        weight: '100g',
+        category: 'Temperos Secos',
+        retailPrice: 9.50,
+        wholesalePrice: 7.20,
+        costPrice: 4.00,
+        stock: 40,
+        themeColor: '#CA8A04',
+        accentColor: '#FEF9C3',
+        imageData: null
+      },
+      {
+        id: 'prod-6',
+        name: 'Chimichurri Tradicional sem Pimenta',
+        weight: '100g',
+        category: 'Ervas',
+        retailPrice: 10.90,
+        wholesalePrice: 8.20,
+        costPrice: 4.60,
+        stock: 30,
+        themeColor: '#166534',
+        accentColor: '#DCFCE7',
+        imageData: null
+      },
+      {
+        id: 'prod-7',
+        name: 'Sal Rosa do Himalaia Fino',
+        weight: '500g',
+        category: 'Sais & Especiarias',
+        retailPrice: 12.90,
+        wholesalePrice: 9.50,
+        costPrice: 5.50,
+        stock: 4, // Estoque baixo inicial para demonstrar alerta e pedido de reposição WhatsApp
+        themeColor: '#DB2777',
+        accentColor: '#FCE7F3',
+        imageData: null
+      },
+      {
+        id: 'prod-8',
+        name: 'Colorau Extra Fino',
+        weight: '200g',
+        category: 'Temperos Secos',
+        retailPrice: 5.90,
+        wholesalePrice: 4.20,
+        costPrice: 2.10,
+        stock: 55,
+        themeColor: '#EA580C',
+        accentColor: '#FFEDD5',
+        imageData: null
+      }
+    ];
+
+    const TEST_USER = {
+      id: 'user-test-1',
+      name: 'Carlos Eduardo Silva',
+      whatsapp: '(41) 99876-5432',
+      email: 'carlos.cliente@email.com',
+      cep: '83005-000',
+      address: 'Rua XV de Novembro, 450 - Centro, São José dos Pinhais/PR',
+      password: '123'
+    };
+
+    function getInitialCashEntries() {
+      const now = Date.now();
+      return [
+        {
+          id: 'cash-init-2',
+          date: new Date(now - 3600 * 1000).toISOString(),
+          type: 'Saída',
+          category: 'Reposição de Estoque',
+          description: 'Compra de embalagens stand-up pouch e rótulos',
+          payment: 'PIX',
+          grossAmount: 145.00,
+          feePercent: 0,
+          feeAmount: 0,
+          netAmount: 145.00,
+          cmvAmount: 0,
+          orderId: null
+        },
+        {
+          id: 'cash-init-1',
+          date: new Date(now - 7200 * 1000).toISOString(),
+          type: 'Entrada',
+          category: 'Outros',
+          description: 'Fundo inicial de caixa da loja',
+          payment: 'Dinheiro',
+          grossAmount: 300.00,
+          feePercent: 0,
+          feeAmount: 0,
+          netAmount: 300.00,
+          cmvAmount: 0,
+          orderId: null
+        }
+      ];
+    }
+
+    // =========================================================================
+    // 2. ESTADO GLOBAL DA APLICAÇÃO
+    // =========================================================================
+    let state = {
+      activeTab: 'vitrine',
+      isAdmin: false,
+      selectedCategory: 'Todos',
+      cashFilter: 'Todos',
+      settings: JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),
+      products: [],
+      cashEntries: [],
+      orders: [],
+      users: [],
+      currentUser: null,
+      cart: [],
+      shipping: {
+        cep: '',
+        locationLabel: '',
+        uf: '',
+        selectedOptionId: 'pickup',
+        options: [
+          { id: 'pickup', label: 'Retirada na Loja (Grátis - Pronto em 2h)', price: 0 },
+          { id: 'economic', label: 'Entrega Econômica (3 a 6 dias úteis)', price: 12.90 },
+          { id: 'express', label: 'Entrega Expressa (1 a 2 dias úteis)', price: 24.90 }
+        ]
+      },
+      pendingNewPhotoData: null,
+      pendingEditPhotoData: undefined
+    };
+
+    // =========================================================================
+    // 3. UTILITÁRIOS DE FORMATAÇÃO, MÁSCARAS E WHATSAPP
+    // =========================================================================
+    function formatBRL(value) {
+      return Number(value || 0).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      });
+    }
+
+    function parseDecimalBR(raw) {
+      if (typeof raw === 'number') return raw;
+      if (!raw) return NaN;
+      let str = String(raw).trim().replace(/[R$\s%]/g, '');
+      if (str.includes(',') && str.includes('.')) {
+        str = str.replace(/\./g, '').replace(',', '.');
+      } else if (str.includes(',')) {
+        str = str.replace(',', '.');
+      }
+      return parseFloat(str);
+    }
+
+    function formatDateTimeBR(isoString) {
+      const d = new Date(isoString);
+      if (isNaN(d.getTime())) return isoString;
+      return d.toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    function toDatetimeLocalValue(isoString) {
+      const d = isoString ? new Date(isoString) : new Date();
+      if (isNaN(d.getTime())) return '';
+      const pad = n => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function escapeHTML(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function formatCepMask(value) {
+      const digits = String(value || '').replace(/\D/g, '').slice(0, 8);
+      if (digits.length > 5) return digits.slice(0, 5) + '-' + digits.slice(5);
+      return digits;
+    }
+
+    function maskCepInput(el) {
+      el.value = formatCepMask(el.value);
+    }
+
+    function formatPhoneMask(value) {
+      const d = String(value || '').replace(/\D/g, '').slice(0, 11);
+      if (d.length <= 2) return d;
+      if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+      if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+      return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+    }
+
+    function maskPhoneInput(el) {
+      el.value = formatPhoneMask(el.value);
+    }
+
+    function normalizeWhatsAppDigits(rawPhone) {
+      const digits = String(rawPhone || '').replace(/\D/g, '');
+      if (!digits) return '';
+      if (digits.startsWith('55') && digits.length >= 12) return digits;
+      return '55' + digits;
+    }
+
+    function openWhatsAppLink(phone, message) {
+      const cleanPhone = normalizeWhatsAppDigits(phone);
+      const encoded = encodeURIComponent(message);
+      const url = cleanPhone
+        ? `https://wa.me/${cleanPhone}?text=${encoded}`
+        : `https://wa.me/?text=${encoded}`;
+
+      const win = window.open(url, '_blank', 'noopener,noreferrer');
+      if (!win) {
+        copyTextFallback(message);
+        showToast('Bloqueador de pop-up detectado. Mensagem copiada para colar no WhatsApp!', 'warning');
+      }
+    }
+
+    function copyTextFallback(text) {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      } catch (e) {
+        // silencia erro
+      }
+    }
+
+    // =========================================================================
+    // 4. ILUSTRAÇÃO SVG DE EMBALAGEM DE CONDIMENTOS
+    // =========================================================================
+    function getCondimentSVG(product) {
+      const color = product.themeColor || '#15803D';
+      const bg = product.accentColor || '#FEF9C3';
+      const shortWeight = escapeHTML(product.weight || '100g');
+
+      return `
+        <svg viewBox="0 0 80 80" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <rect width="80" height="80" rx="14" fill="${bg}" />
+          <path d="M22 14 H58 L62 64 C62 67 60 69 57 69 H23 C20 69 18 67 18 64 L22 14 Z" fill="#FFFFFF" stroke="${color}" stroke-width="2.2"/>
+          <line x1="22" y1="21" x2="58" y2="21" stroke="${color}" stroke-width="1.5" stroke-dasharray="2 2"/>
+          <rect x="23" y="27" width="34" height="24" rx="4" fill="${color}" />
+          <circle cx="34" cy="36" r="2.2" fill="#FEF08A"/>
+          <circle cx="40" cy="34" r="2.6" fill="#FFFFFF"/>
+          <circle cx="46" cy="37" r="2" fill="#FEF08A"/>
+          <rect x="27" y="42" width="26" height="7" rx="3.5" fill="#FFFFFF" />
+          <text x="40" y="47.2" text-anchor="middle" font-family="Inter, sans-serif" font-size="5.5" font-weight="800" fill="#1F2937">${shortWeight}</text>
+          <path d="M24 62 Q40 57 56 62" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.5"/>
+        </svg>
+      `;
+    }
+
+    function renderProductVisual(product, extraImgClass = 'w-full h-full object-cover') {
+      if (product.imageData) {
+        return `<img src="${product.imageData}" alt="${escapeHTML(product.name)}" class="${extraImgClass}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" /><div style="display:none" class="w-full h-full">${getCondimentSVG(product)}</div>`;
+      }
+      return getCondimentSVG(product);
+    }
+
+    // =========================================================================
+    // 5. PERSISTÊNCIA EM LOCALSTORAGE
+    // =========================================================================
+    function loadFromStorage() {
+      try {
+        const rawSettings = localStorage.getItem(STORAGE_KEYS.SETTINGS);
+        const rawProducts = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
+        const rawCash = localStorage.getItem(STORAGE_KEYS.CASH);
+        const rawOrders = localStorage.getItem(STORAGE_KEYS.ORDERS);
+        const rawUsers = localStorage.getItem(STORAGE_KEYS.USERS);
+        const rawSession = localStorage.getItem(STORAGE_KEYS.SESSION);
+        const rawCart = localStorage.getItem(STORAGE_KEYS.CART);
+        const rawAdminAuth = sessionStorage.getItem(STORAGE_KEYS.ADMIN_AUTH);
+
+        state.settings = rawSettings
+          ? { ...DEFAULT_SETTINGS, ...JSON.parse(rawSettings), fees: { ...DEFAULT_SETTINGS.fees, ...(JSON.parse(rawSettings).fees || {}) } }
+          : JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+
+        state.products = rawProducts ? JSON.parse(rawProducts) : JSON.parse(JSON.stringify(INITIAL_PRODUCTS));
+        state.cashEntries = rawCash ? JSON.parse(rawCash) : getInitialCashEntries();
+        state.orders = rawOrders ? JSON.parse(rawOrders) : [];
+        state.users = rawUsers ? JSON.parse(rawUsers) : [TEST_USER];
+        state.currentUser = rawSession ? JSON.parse(rawSession) : null;
+        state.cart = rawCart ? JSON.parse(rawCart) : [];
+        state.isAdmin = rawAdminAuth === 'true';
+
+        if (!rawSettings) persistSettings();
+        if (!rawProducts) persistProducts();
+        if (!rawCash) persistCash();
+        if (!rawUsers) persistUsers();
+      } catch (e) {
+        state.settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+        state.products = JSON.parse(JSON.stringify(INITIAL_PRODUCTS));
+        state.cashEntries = getInitialCashEntries();
+        state.orders = [];
+        state.users = [TEST_USER];
+        state.currentUser = null;
+        state.cart = [];
+        state.isAdmin = false;
+      }
+    }
+
+    function persistSettings() {
+      localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(state.settings));
+    }
+
+    function persistProducts() {
+      try {
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(state.products));
+        return true;
+      } catch (e) {
+        showToast('Limite de armazenamento atingido ao salvar foto. Use uma foto menor.', 'error');
+        return false;
+      }
+    }
+
+    function persistCash() {
+      localStorage.setItem(STORAGE_KEYS.CASH, JSON.stringify(state.cashEntries));
+    }
+
+    function persistOrders() {
+      localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(state.orders));
+    }
+
+    function persistUsers() {
+      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(state.users));
+    }
+
+    function persistSession() {
+      if (state.currentUser) {
+        localStorage.setItem(STORAGE_KEYS.SESSION, JSON.stringify(state.currentUser));
+      } else {
+        localStorage.removeItem(STORAGE_KEYS.SESSION);
+      }
+    }
+
+    function persistCart() {
+      localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(state.cart));
+    }
+
+    // =========================================================================
+    // 6. CONTROLE DE ACESSO (RBAC) & NAVEGAÇÃO ENTRE ABAS
+    // =========================================================================
+    function handleAdminHeaderClick() {
+      if (state.isAdmin) {
+        switchTab('admin-pedidos');
+      } else {
+        openAdminLoginModal();
+      }
+    }
+
+    function openAdminLoginModal() {
+      document.getElementById('adminPasswordInput').value = '';
+      const modal = document.getElementById('adminLoginModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => document.getElementById('adminPasswordInput').focus(), 50);
+    }
+
+    function closeAdminLoginModal() {
+      const modal = document.getElementById('adminLoginModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function handleAdminLoginSubmit(event) {
+      if (event) event.preventDefault();
+      const inputPass = document.getElementById('adminPasswordInput').value.trim();
+      const expected = state.settings.adminPassword || 'admin123';
+
+      if (inputPass !== expected) {
+        showToast('Senha administrativa incorreta.', 'error');
+        return;
+      }
+
+      unlockAdminMode();
+    }
+
+    function loginAsAdminDemo() {
+      unlockAdminMode();
+    }
+
+    function unlockAdminMode() {
+      state.isAdmin = true;
+      sessionStorage.setItem(STORAGE_KEYS.ADMIN_AUTH, 'true');
+      closeAdminLoginModal();
+      switchTab('admin-pedidos');
+      showToast('Área Administrativa desbloqueada!', 'success');
+    }
+
+    function logoutAdmin() {
+      state.isAdmin = false;
+      sessionStorage.removeItem(STORAGE_KEYS.ADMIN_AUTH);
+      if (state.activeTab.startsWith('admin-')) {
+        switchTab('vitrine');
+      } else {
+        renderAll();
+      }
+      showToast('Painel Administrativo bloqueado.', 'info');
+    }
+
+    function switchTab(tabName) {
+      // Bloqueia navegação direta para abas admin se não autenticado
+      if (tabName.startsWith('admin-') && !state.isAdmin) {
+        openAdminLoginModal();
+        return;
+      }
+
+      state.activeTab = tabName;
+      const allTabs = [
+        'vitrine',
+        'meus-pedidos',
+        'admin-pedidos',
+        'admin-estoque',
+        'admin-caixa',
+        'admin-config'
+      ];
+
+      allTabs.forEach(name => {
+        const viewEl = document.getElementById(`view-${name}`);
+        if (viewEl) viewEl.classList.toggle('hidden', name !== tabName);
+
+        const btn = document.getElementById(`tab-btn-${name}`);
+        if (!btn) return;
+
+        const isAdminTab = name.startsWith('admin-');
+        if (name === tabName) {
+          btn.className = isAdminTab
+            ? 'px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-[#1F2937] text-[#FACC15] flex items-center gap-1'
+            : 'px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer bg-[#1F2937] text-[#FACC15] flex items-center gap-1.5';
+        } else {
+          btn.className = isAdminTab
+            ? 'px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-white/90 hover:bg-white text-[#1F2937] flex items-center gap-1'
+            : 'px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer bg-white/85 hover:bg-white text-[#1F2937] flex items-center gap-1.5';
+        }
+      });
+
+      renderAll();
+    }
+
+    function renderAll() {
+      // Atualiza identidade da loja no header/footer
+      document.getElementById('headerStoreName').textContent = state.settings.storeName;
+      document.getElementById('footerStoreName').textContent = state.settings.storeName;
+
+      // Atualiza estado visual RBAC Admin
+      const adminNav = document.getElementById('adminNavBar');
+      const adminBtn = document.getElementById('headerAdminBtn');
+      const adminIcon = document.getElementById('headerAdminIcon');
+      const adminLabel = document.getElementById('headerAdminLabel');
+
+      if (state.isAdmin) {
+        adminNav.classList.remove('hidden');
+        adminNav.classList.add('flex');
+        adminBtn.className = 'flex items-center gap-1.5 bg-[#1F2937] text-[#FACC15] font-bold text-xs px-3 py-2.5 rounded-xl border border-[#1F2937] transition cursor-pointer';
+        adminIcon.textContent = '🔓';
+        adminLabel.textContent = 'Admin Ativo';
+      } else {
+        adminNav.classList.add('hidden');
+        adminNav.classList.remove('flex');
+        adminBtn.className = 'flex items-center gap-1.5 bg-yellow-300/75 hover:bg-white text-[#1F2937] font-bold text-xs px-3 py-2.5 rounded-xl border border-yellow-500/50 transition cursor-pointer';
+        adminIcon.textContent = '🔒';
+        adminLabel.textContent = 'Área Admin';
+      }
+
+      updateHeaderUserUI();
+      updateCartHeaderBadge();
+      updateOrderBadges();
+      renderVitrineCategories();
+      renderVitrine();
+      renderMyOrders();
+
+      if (state.isAdmin) {
+        renderAdminOrders();
+        renderStockGrid();
+        renderCashFlow();
+        populateSettingsForm();
+      }
+
+      renderCartDrawer();
+    }
+
+    // =========================================================================
+    // 7. AUTENTICAÇÃO DE CLIENTES (LOGIN / CADASTRO COM VIACEP)
+    // =========================================================================
+    function updateHeaderUserUI() {
+      const label = document.getElementById('headerAuthLabel');
+      if (state.currentUser) {
+        const firstName = state.currentUser.name.split(' ')[0];
+        label.textContent = `Olá, ${firstName}`;
+        document.getElementById('dropdownUserName').textContent = state.currentUser.name;
+        document.getElementById('dropdownUserWhatsApp').textContent = `📱 ${state.currentUser.whatsapp || ''}`;
+        document.getElementById('dropdownUserCep').textContent = state.currentUser.cep ? `CEP: ${state.currentUser.cep}` : '';
+      } else {
+        label.textContent = 'Entrar / Cadastrar';
+      }
+    }
+
+    function handleHeaderAuthClick() {
+      if (state.currentUser) {
+        document.getElementById('userAccountDropdown').classList.toggle('hidden');
+      } else {
+        openAuthModal('login');
+      }
+    }
+
+    function closeUserDropdown() {
+      document.getElementById('userAccountDropdown').classList.add('hidden');
+    }
+
+    function openAuthModal(mode = 'login') {
+      closeUserDropdown();
+      const modal = document.getElementById('authModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      switchAuthMode(mode);
+    }
+
+    function closeAuthModal() {
+      const modal = document.getElementById('authModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function switchAuthMode(mode) {
+      const isLogin = mode === 'login';
+      document.getElementById('loginForm').classList.toggle('hidden', !isLogin);
+      document.getElementById('registerForm').classList.toggle('hidden', isLogin);
+
+      document.getElementById('authTabLogin').className = isLogin
+        ? 'py-2 rounded-lg text-xs font-extrabold bg-[#1F2937] text-[#FACC15] cursor-pointer'
+        : 'py-2 rounded-lg text-xs font-extrabold text-[#1F2937] cursor-pointer';
+
+      document.getElementById('authTabRegister').className = !isLogin
+        ? 'py-2 rounded-lg text-xs font-extrabold bg-[#1F2937] text-[#FACC15] cursor-pointer'
+        : 'py-2 rounded-lg text-xs font-extrabold text-[#1F2937] cursor-pointer';
+    }
+
+    async function lookupViaCep(cepDigits) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 4500);
+      try {
+        const res = await fetch(`https://viacep.com.br/ws/${cepDigits}/json/`, {
+          signal: controller.signal
+        });
+        clearTimeout(timer);
+        if (!res.ok) return null;
+        const data = await res.json();
+        if (data.erro) return { invalid: true };
+        return data;
+      } catch (e) {
+        clearTimeout(timer);
+        return null;
+      }
+    }
+
+    async function handleRegisterCepInput(inputEl) {
+      maskCepInput(inputEl);
+      const digits = inputEl.value.replace(/\D/g, '');
+      const statusEl = document.getElementById('regCepStatus');
+      if (digits.length < 8) {
+        statusEl.textContent = 'Digite os 8 dígitos do CEP';
+        return;
+      }
+
+      statusEl.textContent = 'Buscando endereço...';
+      const data = await lookupViaCep(digits);
+      if (data && data.invalid) {
+        statusEl.textContent = 'CEP não encontrado. Preencha manualmente.';
+        return;
+      }
+      if (data) {
+        const parts = [data.logradouro, data.bairro, `${data.localidade}/${data.uf}`].filter(Boolean);
+        document.getElementById('regAddress').value = parts.join(' - ');
+        statusEl.textContent = `✓ ${data.localidade}/${data.uf}`;
+      } else {
+        statusEl.textContent = 'Modo offline: preencha o endereço.';
+      }
+    }
+
+    function handleRegisterSubmit(event) {
+      if (event) event.preventDefault();
+      const name = document.getElementById('regName').value.trim();
+      const whatsapp = formatPhoneMask(document.getElementById('regWhatsapp').value);
+      const email = document.getElementById('regEmail').value.trim();
+      const cep = formatCepMask(document.getElementById('regCep').value);
+      const address = document.getElementById('regAddress').value.trim();
+      const password = document.getElementById('regPassword').value.trim();
+
+      if (!name || whatsapp.replace(/\D/g, '').length < 10 || !email || cep.replace(/\D/g, '').length !== 8 || !address || !password) {
+        showToast('Preencha todos os campos (incluindo WhatsApp e CEP válido).', 'error');
+        return;
+      }
+
+      const exists = state.users.find(
+        u => u.email.toLowerCase() === email.toLowerCase() || u.whatsapp === whatsapp
+      );
+      if (exists) {
+        showToast('Já existe uma conta cadastrada com este e-mail ou WhatsApp.', 'warning');
+        return;
+      }
+
+      const newUser = {
+        id: 'user-' + Date.now(),
+        name,
+        whatsapp,
+        email,
+        cep,
+        address,
+        password
+      };
+
+      state.users.push(newUser);
+      persistUsers();
+      setLoggedUser(newUser);
+      document.getElementById('registerForm').reset();
+      closeAuthModal();
+      showToast(`Bem-vindo(a), ${newUser.name.split(' ')[0]}! Conta criada.`, 'success');
+    }
+
+    function handleLoginSubmit(event) {
+      if (event) event.preventDefault();
+      const contact = document.getElementById('loginContact').value.trim();
+      const password = document.getElementById('loginPassword').value.trim();
+      const cleanDigits = contact.replace(/\D/g, '');
+
+      const found = state.users.find(u => {
+        const matchEmail = u.email.toLowerCase() === contact.toLowerCase();
+        const matchPhone = cleanDigits.length >= 10 && u.whatsapp.replace(/\D/g, '') === cleanDigits;
+        return (matchEmail || matchPhone) && u.password === password;
+      });
+
+      if (!found) {
+        showToast('Credenciais inválidas. Tente novamente ou use a Conta Teste.', 'error');
+        return;
+      }
+
+      setLoggedUser(found);
+      document.getElementById('loginForm').reset();
+      closeAuthModal();
+      showToast(`Olá, ${found.name.split(' ')[0]}! Login realizado.`, 'success');
+    }
+
+    function loginWithTestAccount() {
+      setLoggedUser(TEST_USER);
+      closeAuthModal();
+      showToast(`Logado como ${TEST_USER.name}!`, 'success');
+    }
+
+    function setLoggedUser(user) {
+      state.currentUser = user;
+      persistSession();
+      applyUserToCheckout();
+      renderAll();
+    }
+
+    function logoutUser() {
+      closeUserDropdown();
+      state.currentUser = null;
+      persistSession();
+      renderAll();
+      showToast('Você saiu da conta.', 'info');
+    }
+
+    function applyUserToCheckout() {
+      if (!state.currentUser) return;
+      const nameEl = document.getElementById('checkoutCustomerName');
+      const wppEl = document.getElementById('checkoutCustomerWhatsApp');
+      const addrEl = document.getElementById('checkoutCustomerAddress');
+      const cepEl = document.getElementById('cartCepInput');
+
+      if (nameEl && !nameEl.value.trim()) nameEl.value = state.currentUser.name;
+      if (wppEl && !wppEl.value.trim()) wppEl.value = state.currentUser.whatsapp || '';
+      if (addrEl && !addrEl.value.trim()) addrEl.value = state.currentUser.address || '';
+      if (cepEl && !cepEl.value.trim() && state.currentUser.cep) {
+        cepEl.value = state.currentUser.cep;
+        calculateShippingByCep(true);
+      }
+    }
+
+    // =========================================================================
+    // 8. INTEGRAÇÃO COMPLETA COM WHATSAPP (CLIENTE & LOJISTA)
+    // =========================================================================
+    function toggleWhatsAppMenu(forceState) {
+      const menu = document.getElementById('whatsappQuickMenu');
+      if (typeof forceState === 'boolean') {
+        menu.classList.toggle('hidden', !forceState);
+      } else {
+        menu.classList.toggle('hidden');
+      }
+    }
+
+    function openStoreQuickWhatsApp(topic) {
+      toggleWhatsAppMenu(false);
+      const store = state.settings.storeName;
+      const messages = {
+        atacado: `Olá, equipe *${store}*! Gostaria de saber mais sobre os descontos de *Atacado (5+ unidades)* e disponibilidade de condimentos.`,
+        entrega: `Olá, equipe *${store}*! Gostaria de consultar prazos e opções de frete para o meu CEP.`,
+        vendedor: `Olá, equipe *${store}*! Vim pelo site e gostaria de falar com um vendedor.`
+      };
+      openWhatsAppLink(state.settings.storeWhatsApp, messages[topic] || messages.vendedor);
+    }
+
+    function consultProductWhatsApp(productId) {
+      const p = state.products.find(item => item.id === productId);
+      if (!p) return;
+      const msg = [
+        `Olá, *${state.settings.storeName}*! Tenho interesse neste condimento do site:`,
+        ``,
+        `🌶️ *${p.name}* (${p.weight})`,
+        `• Categoria: ${p.category}`,
+        `• Preço Varejo: ${formatBRL(p.retailPrice)}`,
+        `• Preço Atacado (5+ un.): ${formatBRL(p.wholesalePrice)}`,
+        `• Estoque atual no site: ${p.stock} un.`,
+        ``,
+        `Poderia me passar mais informações?`
+      ].join('\n');
+
+      openWhatsAppLink(state.settings.storeWhatsApp, msg);
+    }
+
+    function sendOrderToStoreWhatsApp(orderId) {
+      const order = state.orders.find(o => o.id === orderId);
+      if (!order) return;
+
+      const itemsLines = order.items.map(i =>
+        `• ${i.qty}x ${i.name} (${i.weight}) — ${formatBRL(i.lineTotal)}${i.isWholesale ? ' [Atacado]' : ''}`
+      ).join('\n');
+
+      const pixLine = order.paymentMethod === 'PIX'
+        ? `\n🔑 *Chave PIX da Loja:* ${state.settings.pixKey}`
+        : '';
+
+      const msg = [
+        `🛒 *NOVO PEDIDO — ${state.settings.storeName.toUpperCase()}*`,
+        `📋 *Código:* #${order.id}`,
+        `👤 *Cliente:* ${order.customerName}`,
+        `📱 *WhatsApp:* ${order.customerWhatsApp || 'Não informado'}`,
+        ``,
+        `*Itens do Pedido:*`,
+        itemsLines,
+        ``,
+        `🚚 *Entrega:* ${order.shippingMethod}`,
+        `📍 *Endereço:* ${order.address} (CEP: ${order.cep})`,
+        `💵 *Subtotal:* ${formatBRL(order.subtotal)}`,
+        `📦 *Frete:* ${order.shippingCost === 0 ? 'Grátis' : formatBRL(order.shippingCost)}`,
+        `💳 *Pagamento:* ${order.paymentMethod}${pixLine}`,
+        `✅ *TOTAL DO PEDIDO: ${formatBRL(order.total)}*`
+      ].join('\n');
+
+      openWhatsAppLink(state.settings.storeWhatsApp, msg);
+    }
+
+    function notifyCustomerOrderWhatsApp(orderId) {
+      const order = state.orders.find(o => o.id === orderId);
+      if (!order) return;
+
+      const stepLabel = ORDER_STEPS[order.statusIndex || 0];
+      const msg = [
+        `Olá, *${order.customerName}*! Aqui é da equipe *${state.settings.storeName}* 🌶️`,
+        ``,
+        `Atualização do seu pedido *#${order.id}*:`,
+        `📦 *Status Atual:* ${stepLabel}`,
+        `📍 *Destino:* ${order.address}`,
+        `💰 *Total:* ${formatBRL(order.total)} (${order.paymentMethod})`,
+        ``,
+        `Qualquer dúvida estamos à disposição!`
+      ].join('\n');
+
+      if (!order.customerWhatsApp) {
+        showToast('Pedido sem número de WhatsApp cadastrado. Abrindo texto para compartilhamento.', 'warning');
+      }
+      openWhatsAppLink(order.customerWhatsApp || '', msg);
+    }
+
+    function sendRestockRequestWhatsApp() {
+      const lowItems = state.products.filter(p => p.stock <= 5);
+      if (lowItems.length === 0) {
+        showToast('Todos os produtos estão com estoque acima de 5 unidades!', 'info');
+        return;
+      }
+
+      const lines = lowItems.map(p => {
+        const suggested = Math.max(20, 30 - p.stock);
+        return `• *${p.name}* (${p.weight}) — Estoque atual: ${p.stock} un. | Sugestão compra: *+${suggested} un.*`;
+      }).join('\n');
+
+      const msg = [
+        `📦 *PEDIDO DE REPOSIÇÃO DE ESTOQUE — ${state.settings.storeName.toUpperCase()}*`,
+        `Data: ${formatDateTimeBR(new Date().toISOString())}`,
+        ``,
+        `Olá! Precisamos repor os seguintes condimentos com estoque baixo/zerado:`,
+        ``,
+        lines,
+        ``,
+        `Por favor, confirmar disponibilidade e prazo de entrega.`
+      ].join('\n');
+
+      openWhatsAppLink('', msg);
+    }
+
+    function sendCashSummaryWhatsApp() {
+      const stats = computeCashMetrics();
+      const msg = [
+        `📊 *RESUMO DO FLUXO DE CAIXA — ${state.settings.storeName.toUpperCase()}*`,
+        `Atualizado em: ${formatDateTimeBR(new Date().toISOString())}`,
+        ``,
+        `🟢 *Entradas Brutas:* ${formatBRL(stats.grossInflow)} (${stats.inflowCount} lanç.)`,
+        `🔴 *Taxas de Pagamento:* - ${formatBRL(stats.totalFees)}`,
+        `🔴 *Saídas / Despesas:* - ${formatBRL(stats.totalOutflow)} (${stats.outflowCount} lanç.)`,
+        `💰 *Saldo Líquido em Caixa:* ${formatBRL(stats.netBalance)}`,
+        `📈 *Lucro Líquido Estimado (após CMV):* ${formatBRL(stats.netProfit)}`
+      ].join('\n');
+
+      openWhatsAppLink('', msg);
+    }
+
+    // =========================================================================
+    // 9. VITRINE E-COMMERCE
+    // =========================================================================
+    function renderVitrineCategories() {
+      const container = document.getElementById('vitrineCategoryPills');
+      container.innerHTML = CATEGORIES.map(cat => {
+        const isActive = state.selectedCategory === cat;
+        return `
+          <button
+            type="button"
+            onclick="selectCategory('${cat}')"
+            class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+              isActive
+                ? 'bg-[#FACC15] text-[#1F2937] border border-yellow-400 shadow-2xs'
+                : 'bg-[#FFFDF2] hover:bg-[#FEFCE8] text-slate-700 border border-slate-200'
+            }"
+          >
+            ${escapeHTML(cat)}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectCategory(cat) {
+      state.selectedCategory = cat;
+      renderVitrineCategories();
+      renderVitrine();
+    }
+
+    function renderVitrine() {
+      const grid = document.getElementById('vitrineGrid');
+      const query = (document.getElementById('vitrineSearchInput')?.value || '').trim().toLowerCase();
+
+      const filtered = state.products.filter(p => {
+        const matchCat = state.selectedCategory === 'Todos' || p.category === state.selectedCategory;
+        const matchText =
+          !query ||
+          p.name.toLowerCase().includes(query) ||
+          p.category.toLowerCase().includes(query) ||
+          (p.weight || '').toLowerCase().includes(query);
+        return matchCat && matchText;
+      });
+
+      document.getElementById('vitrineCountBadge').textContent =
+        `${filtered.length} ${filtered.length === 1 ? 'produto' : 'produtos'}`;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full bg-white rounded-2xl p-8 text-center border border-yellow-200">
+            <p class="font-bold text-[#1F2937]">Nenhum condimento encontrado.</p>
+            <button
+              type="button"
+              onclick="document.getElementById('vitrineSearchInput').value=''; selectCategory('Todos');"
+              class="mt-3 px-4 py-2 rounded-xl bg-[#FACC15] text-[#1F2937] text-xs font-bold cursor-pointer"
+            >
+              Limpar Filtros
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(p => {
+        const outOfStock = p.stock <= 0;
+        const lowStock = p.stock > 0 && p.stock <= 5;
+        const cartItem = state.cart.find(c => c.productId === p.id);
+
+        return `
+          <div class="bg-white rounded-2xl p-4 border ${outOfStock ? 'border-slate-200 opacity-80' : 'border-yellow-200/90 hover:border-yellow-400'} shadow-2xs transition flex flex-col justify-between">
+            <div>
+              <!-- Categoria e Selo de Estoque -->
+              <div class="flex items-center justify-between gap-2 text-[11px]">
+                <span class="font-semibold text-slate-600 bg-[#FEFCE8] px-2 py-0.5 rounded-lg border border-yellow-200 truncate">
+                  ${escapeHTML(p.category)}
+                </span>
+                ${
+                  outOfStock
+                    ? `<span class="font-bold text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded-lg shrink-0">Esgotado</span>`
+                    : lowStock
+                    ? `<span class="font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-lg shrink-0">Últimas ${p.stock} un.</span>`
+                    : `<span class="font-semibold text-slate-500 shrink-0">Estoque: ${p.stock}</span>`
+                }
+              </div>
+
+              <!-- Imagem / SVG -->
+              <div class="my-3.5 flex items-center gap-3">
+                <div class="w-16 h-16 rounded-2xl bg-[#FFFDF2] border border-yellow-200 overflow-hidden shrink-0 flex items-center justify-center">
+                  ${renderProductVisual(p)}
+                </div>
+                <div class="min-w-0">
+                  <span class="inline-block text-[11px] font-bold text-yellow-950 bg-[#FEFCE8] border border-yellow-300 px-2 py-0.5 rounded-md mb-1">
+                    ${escapeHTML(p.weight || '100g')}
+                  </span>
+                  <h3 class="font-extrabold text-sm sm:text-base text-[#1F2937] leading-snug line-clamp-2">
+                    ${escapeHTML(p.name)}
+                  </h3>
+                </div>
+              </div>
+
+              <!-- Preços Varejo e Atacado -->
+              <div class="space-y-1.5 mb-3.5">
+                <div class="flex items-center justify-between text-xs bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
+                  <span class="text-slate-600 font-medium">Varejo (1-4 un.)</span>
+                  <span class="font-bold text-[#1F2937] text-sm">${formatBRL(p.retailPrice)}</span>
+                </div>
+
+                <div class="flex items-center justify-between text-xs bg-emerald-50/80 px-3 py-2 rounded-xl border border-emerald-200">
+                  <span class="text-[#15803D] font-bold">Atacado (5+ un.)</span>
+                  <span class="font-extrabold text-[#15803D] text-base">${formatBRL(p.wholesalePrice)}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Botões de Compra e Consulta WhatsApp -->
+            <div class="space-y-2">
+              ${
+                outOfStock
+                  ? `<button type="button" disabled class="w-full py-2.5 px-3 rounded-xl bg-slate-200 text-slate-500 font-bold text-xs cursor-not-allowed">
+                      Produto Esgotado
+                    </button>`
+                  : `<button
+                      type="button"
+                      onclick="addToCart('${p.id}', 1)"
+                      class="w-full py-2.5 px-3 rounded-xl bg-[#15803D] hover:bg-[#166534] active:scale-98 text-white font-bold text-xs sm:text-sm transition cursor-pointer"
+                    >
+                      + Adicionar${cartItem ? ` (${cartItem.qty} no carrinho)` : ''}
+                    </button>`
+              }
+
+              <button
+                type="button"
+                onclick="consultProductWhatsApp('${p.id}')"
+                class="w-full py-2 px-3 rounded-xl bg-[#FFFDF2] hover:bg-emerald-50 text-[#15803D] border border-emerald-200 font-bold text-xs transition cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <span>📲 Consultar no WhatsApp</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // =========================================================================
+    // 10. CARRINHO, FRETE POR CEP E FINALIZAÇÃO DE PEDIDO
+    // =========================================================================
+    function addToCart(productId, qty) {
+      const prod = state.products.find(p => p.id === productId);
+      if (!prod || prod.stock <= 0) {
+        showToast('Este produto está esgotado.', 'error');
+        return;
+      }
+
+      const existing = state.cart.find(c => c.productId === productId);
+      const currentQty = existing ? existing.qty : 0;
+
+      if (currentQty + qty > prod.stock) {
+        showToast(`Estoque máximo disponível: ${prod.stock} un.`, 'warning');
+        return;
+      }
+
+      if (existing) {
+        existing.qty += qty;
+      } else {
+        state.cart.push({ productId, qty });
+      }
+
+      persistCart();
+      renderAll();
+
+      const updatedQty = existing ? existing.qty : qty;
+      if (updatedQty === 5) {
+        showToast(`Preço de Atacado ativado para ${prod.name}!`, 'success');
+      } else {
+        showToast(`${prod.name} adicionado ao carrinho!`, 'success');
+      }
+    }
+
+    function updateCartItemQty(productId, delta) {
+      const prod = state.products.find(p => p.id === productId);
+      const item = state.cart.find(c => c.productId === productId);
+      if (!prod || !item) return;
+
+      const nextQty = item.qty + delta;
+      if (nextQty <= 0) {
+        state.cart = state.cart.filter(c => c.productId !== productId);
+      } else if (nextQty > prod.stock) {
+        showToast(`Limite de estoque: ${prod.stock} un.`, 'warning');
+        return;
+      } else {
+        item.qty = nextQty;
+      }
+
+      persistCart();
+      renderAll();
+    }
+
+    function getEffectiveShippingOptions(productsSubtotal) {
+      const freeEconomic = productsSubtotal >= 150;
+      return state.shipping.options.map(opt => {
+        if (opt.id === 'economic' && freeEconomic) {
+          return {
+            ...opt,
+            label: 'Entrega Econômica (3 a 6 dias úteis) — GRÁTIS',
+            price: 0
+          };
+        }
+        return opt;
+      });
+    }
+
+    function getCartTotals() {
+      let totalUnits = 0;
+      let retailSubtotal = 0;
+      let productsSubtotal = 0;
+      let totalCmv = 0;
+      const items = [];
+
+      state.cart.forEach(entry => {
+        const prod = state.products.find(p => p.id === entry.productId);
+        if (!prod || prod.stock <= 0) return;
+        const qty = Math.min(entry.qty, prod.stock);
+        const isWholesale = qty >= 5;
+        const unitPrice = isWholesale ? prod.wholesalePrice : prod.retailPrice;
+        const lineTotal = unitPrice * qty;
+        const unitCost = Number(prod.costPrice || 0);
+
+        totalUnits += qty;
+        retailSubtotal += prod.retailPrice * qty;
+        productsSubtotal += lineTotal;
+        totalCmv += unitCost * qty;
+
+        items.push({
+          prod,
+          qty,
+          isWholesale,
+          unitPrice,
+          unitCost,
+          lineTotal
+        });
+      });
+
+      const wholesaleSavings = Math.max(0, retailSubtotal - productsSubtotal);
+      const selectedOpt = getEffectiveShippingOptions(productsSubtotal).find(
+        o => o.id === state.shipping.selectedOptionId
+      ) || { id: 'pickup', label: 'Retirada na Loja (Grátis - Pronto em 2h)', price: 0 };
+
+      const shippingCost = items.length > 0 ? selectedOpt.price : 0;
+      const grandTotal = productsSubtotal + shippingCost;
+
+      return {
+        items,
+        totalUnits,
+        retailSubtotal,
+        productsSubtotal,
+        wholesaleSavings,
+        totalCmv,
+        selectedShipping: selectedOpt,
+        shippingCost,
+        grandTotal
+      };
+    }
+
+    async function calculateShippingByCep(silent = false) {
+      const cepInput = document.getElementById('cartCepInput');
+      const digits = (cepInput.value || '').replace(/\D/g, '');
+      if (digits.length !== 8) {
+        if (!silent) showToast('Digite um CEP válido com 8 números.', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('btnCalcShipping');
+      btn.textContent = '...';
+      btn.disabled = true;
+
+      const data = await lookupViaCep(digits);
+      btn.textContent = 'Calcular';
+      btn.disabled = false;
+
+      if (data && data.invalid) {
+        showToast('CEP não encontrado. Verifique os números.', 'error');
+        return;
+      }
+
+      let uf = '';
+      let locationText = '';
+
+      if (data) {
+        uf = data.uf || '';
+        const street = data.logradouro ? `${data.logradouro}, ` : '';
+        const district = data.bairro ? `${data.bairro} - ` : '';
+        locationText = `${street}${district}${data.localidade}/${data.uf}`;
+
+        const addrInput = document.getElementById('checkoutCustomerAddress');
+        if (addrInput && !addrInput.value.trim()) {
+          addrInput.value = `${street}S/N - ${district}${data.localidade}/${data.uf}`;
+        }
+      } else {
+        const firstDigit = digits[0];
+        const regionMap = {
+          '0': 'SP', '1': 'SP',
+          '2': 'RJ/ES',
+          '3': 'MG',
+          '4': 'BA/SE',
+          '5': 'Nordeste',
+          '6': 'Norte/Nordeste',
+          '7': 'Centro-Oeste',
+          '8': 'PR/SC',
+          '9': 'RS'
+        };
+        uf = regionMap[firstDigit] || 'BR';
+        locationText = `CEP ${formatCepMask(digits)} (Região ${uf})`;
+      }
+
+      let econPrice = 16.90;
+      let expPrice = 29.90;
+
+      if (['PR', 'SC', 'SP', 'PR/SC'].includes(uf)) {
+        econPrice = 9.90;
+        expPrice = 18.90;
+      } else if (['RS', 'RJ', 'MG', 'ES', 'RJ/ES'].includes(uf)) {
+        econPrice = 14.90;
+        expPrice = 24.90;
+      } else {
+        econPrice = 21.90;
+        expPrice = 34.90;
+      }
+
+      state.shipping.cep = formatCepMask(digits);
+      state.shipping.uf = uf;
+      state.shipping.locationLabel = locationText;
+      state.shipping.options = [
+        { id: 'pickup', label: 'Retirada na Loja (Grátis - Pronto em 2h)', price: 0 },
+        { id: 'economic', label: 'Entrega Econômica (3 a 6 dias úteis)', price: econPrice },
+        { id: 'express', label: 'Entrega Expressa (1 a 2 dias úteis)', price: expPrice }
+      ];
+
+      if (state.shipping.selectedOptionId === 'pickup') {
+        state.shipping.selectedOptionId = 'economic';
+      }
+
+      renderCartDrawer();
+      if (!silent) showToast(`Frete calculado para ${locationText}!`, 'success');
+    }
+
+    function selectShippingOption(optionId) {
+      state.shipping.selectedOptionId = optionId;
+      renderCartDrawer();
+    }
+
+    function updateCartHeaderBadge() {
+      const totals = getCartTotals();
+      document.getElementById('headerCartCount').textContent = totals.totalUnits;
+      document.getElementById('headerCartTotal').textContent = formatBRL(totals.grandTotal);
+    }
+
+    function toggleCart(open) {
+      const overlay = document.getElementById('cartDrawerOverlay');
+      overlay.classList.toggle('hidden', !open);
+      if (open) {
+        applyUserToCheckout();
+        renderCartDrawer();
+      }
+    }
+
+    function renderCartDrawer() {
+      const itemsContainer = document.getElementById('cartItemsContainer');
+      const checkoutSection = document.getElementById('cartCheckoutSection');
+      const totals = getCartTotals();
+
+      document.getElementById('cartSubtotalDisplay').textContent = formatBRL(totals.productsSubtotal);
+      document.getElementById('cartShippingDisplay').textContent =
+        totals.shippingCost === 0 ? 'Grátis (R$ 0,00)' : formatBRL(totals.shippingCost);
+      document.getElementById('cartGrandTotalDisplay').textContent = formatBRL(totals.grandTotal);
+
+      const savingsRow = document.getElementById('cartWholesaleSavingsRow');
+      if (totals.wholesaleSavings > 0.009) {
+        savingsRow.classList.remove('hidden');
+        document.getElementById('cartWholesaleSavingsDisplay').textContent = `- ${formatBRL(totals.wholesaleSavings)}`;
+      } else {
+        savingsRow.classList.add('hidden');
+      }
+
+      document.getElementById('btnFinalizeOrder').disabled = totals.items.length === 0;
+
+      const quickLoginBtn = document.getElementById('btnCartQuickLogin');
+      if (quickLoginBtn) {
+        quickLoginBtn.classList.toggle('hidden', Boolean(state.currentUser));
+      }
+
+      if (totals.items.length === 0) {
+        checkoutSection.classList.add('hidden');
+        itemsContainer.innerHTML = `
+          <div class="bg-white rounded-2xl p-8 text-center border border-yellow-200 my-6">
+            <span class="text-4xl block mb-2">🛒</span>
+            <p class="font-extrabold text-[#1F2937]">Seu carrinho está vazio</p>
+            <p class="text-xs text-slate-500 mt-1">Adicione condimentos da vitrine para calcular o frete e finalizar sua compra.</p>
+          </div>
+        `;
+        return;
+      }
+
+      checkoutSection.classList.remove('hidden');
+
+      itemsContainer.innerHTML = totals.items.map(line => `
+        <div class="bg-white rounded-2xl p-3.5 border border-yellow-200 flex items-center gap-3">
+          <div class="w-12 h-12 rounded-xl bg-[#FFFDF2] border border-yellow-200 overflow-hidden shrink-0">
+            ${renderProductVisual(line.prod)}
+          </div>
+
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-2">
+              <h4 class="font-bold text-xs sm:text-sm text-[#1F2937] truncate">${escapeHTML(line.prod.name)}</h4>
+              <span class="font-extrabold text-xs sm:text-sm text-[#1F2937] shrink-0">${formatBRL(line.lineTotal)}</span>
+            </div>
+
+            <div class="flex items-center gap-2 mt-0.5">
+              <span class="text-[11px] text-slate-500">${escapeHTML(line.prod.weight)}</span>
+              ${
+                line.isWholesale
+                  ? `<span class="text-[10px] font-bold bg-emerald-100 text-[#15803D] px-1.5 py-0.2 rounded">Atacado ${formatBRL(line.unitPrice)}/un</span>`
+                  : `<span class="text-[10px] font-medium bg-slate-100 text-slate-600 px-1.5 py-0.2 rounded">Varejo ${formatBRL(line.unitPrice)}/un</span>`
+              }
+            </div>
+
+            <div class="flex items-center justify-between mt-2">
+              <div class="inline-flex items-center border border-slate-300 rounded-lg overflow-hidden bg-white">
+                <button type="button" onclick="updateCartItemQty('${line.prod.id}', -1)" class="w-7 h-6 font-bold text-xs hover:bg-slate-100 cursor-pointer">-</button>
+                <span class="w-7 text-center text-xs font-extrabold">${line.qty}</span>
+                <button type="button" onclick="updateCartItemQty('${line.prod.id}', 1)" class="w-7 h-6 font-bold text-xs hover:bg-slate-100 cursor-pointer">+</button>
+              </div>
+
+              ${
+                !line.isWholesale && line.prod.stock >= 5
+                  ? `<button type="button" onclick="updateCartItemQty('${line.prod.id}', ${5 - line.qty})" class="text-[11px] font-bold text-[#15803D] hover:underline cursor-pointer">
+                      Levar 5 (Atacado)
+                    </button>`
+                  : ''
+              }
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      const freeGoalBadge = document.getElementById('shippingFreeGoalBadge');
+      if (totals.productsSubtotal >= 150) {
+        freeGoalBadge.textContent = '✓ Frete Econômico Grátis!';
+      } else {
+        const missing = 150 - totals.productsSubtotal;
+        freeGoalBadge.textContent = `Faltam ${formatBRL(missing)} p/ frete grátis`;
+      }
+
+      const locInfo = document.getElementById('cartCepLocationInfo');
+      if (state.shipping.locationLabel) {
+        locInfo.classList.remove('hidden');
+        locInfo.textContent = `📍 Destino: ${state.shipping.locationLabel}`;
+      } else {
+        locInfo.classList.add('hidden');
+      }
+
+      const effectiveOptions = getEffectiveShippingOptions(totals.productsSubtotal);
+      document.getElementById('shippingOptionsBox').innerHTML = effectiveOptions.map(opt => {
+        const checked = state.shipping.selectedOptionId === opt.id;
+        return `
+          <label
+            onclick="selectShippingOption('${opt.id}')"
+            class="flex items-center justify-between gap-2 p-2.5 rounded-xl border ${
+              checked ? 'border-[#15803D] bg-emerald-50/60' : 'border-slate-200 hover:bg-[#FFFDF2]'
+            } cursor-pointer transition"
+          >
+            <div class="flex items-center gap-2 min-w-0">
+              <input type="radio" name="shippingOptionRadio" ${checked ? 'checked' : ''} class="accent-[#15803D] cursor-pointer" />
+              <span class="text-xs font-semibold text-[#1F2937] truncate">${escapeHTML(opt.label)}</span>
+            </div>
+            <span class="text-xs font-extrabold ${opt.price === 0 ? 'text-[#15803D]' : 'text-[#1F2937]'} shrink-0">
+              ${opt.price === 0 ? 'Grátis' : formatBRL(opt.price)}
+            </span>
+          </label>
+        `;
+      }).join('');
+    }
+
+    function finalizeOrder() {
+      const totals = getCartTotals();
+      if (totals.items.length === 0) return;
+
+      const customerName = document.getElementById('checkoutCustomerName').value.trim();
+      const customerWhatsApp = formatPhoneMask(document.getElementById('checkoutCustomerWhatsApp').value);
+      const customerAddress = document.getElementById('checkoutCustomerAddress').value.trim();
+      const paymentMethod = document.getElementById('checkoutPaymentMethod').value;
+      const cepValue = formatCepMask(document.getElementById('cartCepInput').value);
+
+      if (!customerName) {
+        showToast('Informe o nome do cliente para finalizar.', 'error');
+        document.getElementById('checkoutCustomerName').focus();
+        return;
+      }
+
+      if (customerWhatsApp.replace(/\D/g, '').length < 10) {
+        showToast('Informe um WhatsApp válido com DDD.', 'error');
+        document.getElementById('checkoutCustomerWhatsApp').focus();
+        return;
+      }
+
+      if (totals.selectedShipping.id !== 'pickup' && !customerAddress) {
+        showToast('Informe o endereço completo para entrega.', 'error');
+        document.getElementById('checkoutCustomerAddress').focus();
+        return;
+      }
+
+      for (const line of totals.items) {
+        const prod = state.products.find(p => p.id === line.prod.id);
+        if (!prod || prod.stock < line.qty) {
+          showToast(`Estoque insuficiente para ${line.prod.name}.`, 'error');
+          return;
+        }
+      }
+
+      // 1. Deduz estoque
+      totals.items.forEach(line => {
+        const prod = state.products.find(p => p.id === line.prod.id);
+        prod.stock = Math.max(0, prod.stock - line.qty);
+      });
+      persistProducts();
+
+      // 2. Cria pedido com código único
+      const randomNum = Math.floor(1000 + Math.random() * 9000);
+      const orderCode = `PED-2026-${randomNum}`;
+      const nowISO = new Date().toISOString();
+
+      const newOrder = {
+        id: orderCode,
+        userId: state.currentUser ? state.currentUser.id : null,
+        customerName,
+        customerWhatsApp,
+        cep: cepValue || (state.currentUser ? state.currentUser.cep : 'Retirada'),
+        address: totals.selectedShipping.id === 'pickup'
+          ? `Retirada na Loja — ${state.settings.storeName}`
+          : customerAddress,
+        shippingMethod: totals.selectedShipping.label,
+        shippingCost: Number(totals.shippingCost.toFixed(2)),
+        subtotal: Number(totals.productsSubtotal.toFixed(2)),
+        total: Number(totals.grandTotal.toFixed(2)),
+        cmvTotal: Number(totals.totalCmv.toFixed(2)),
+        paymentMethod,
+        statusIndex: 0,
+        createdAt: nowISO,
+        items: totals.items.map(l => ({
+          productId: l.prod.id,
+          name: l.prod.name,
+          weight: l.prod.weight,
+          qty: l.qty,
+          unitPrice: l.unitPrice,
+          isWholesale: l.isWholesale,
+          lineTotal: l.lineTotal
+        }))
+      };
+
+      state.orders.unshift(newOrder);
+      persistOrders();
+
+      // 3. Registra Entrada Automática no Fluxo de Caixa com cálculo de taxa e CMV
+      const feePercent = Number(state.settings.fees[paymentMethod] ?? 0);
+      const grossAmount = newOrder.total;
+      const feeAmount = Number(((grossAmount * feePercent) / 100).toFixed(2));
+      const netAmount = Number((grossAmount - feeAmount).toFixed(2));
+
+      const itemsSummary = newOrder.items
+        .map(i => `${i.qty}x ${i.name}${i.isWholesale ? ' (Atacado)' : ''}`)
+        .join(', ');
+
+      state.cashEntries.unshift({
+        id: 'cash-sale-' + Date.now(),
+        date: nowISO,
+        type: 'Entrada',
+        category: 'Venda E-Commerce',
+        description: `Venda Automática #${orderCode} — ${itemsSummary}${newOrder.shippingCost > 0 ? ` + Frete (${formatBRL(newOrder.shippingCost)})` : ''}`,
+        payment: paymentMethod,
+        grossAmount,
+        feePercent,
+        feeAmount,
+        netAmount,
+        cmvAmount: newOrder.cmvTotal,
+        orderId: orderCode
+      });
+      persistCash();
+
+      // 4. Limpa carrinho e abre modal de sucesso com botão WhatsApp
+      state.cart = [];
+      persistCart();
+      toggleCart(false);
+      renderAll();
+      openOrderSuccessModal(newOrder);
+    }
+
+    function openOrderSuccessModal(order) {
+      const modal = document.getElementById('orderSuccessModal');
+      const content = document.getElementById('orderSuccessContent');
+
+      content.innerHTML = `
+        <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-[#15803D] flex items-center justify-center text-3xl mx-auto">
+          ✓
+        </div>
+        <div>
+          <span class="text-xs font-extrabold uppercase tracking-wider text-[#15803D]">Pedido Confirmado!</span>
+          <h3 class="text-xl font-extrabold text-[#1F2937] mt-1">Obrigado pela compra!</h3>
+          <p class="text-xs text-slate-500 mt-1">
+            Envie seu pedido pelo WhatsApp da loja para agilizar a separação ou acompanhe o rastreio abaixo.
+          </p>
+        </div>
+
+        <div class="bg-[#FEFCE8] border border-yellow-300 rounded-2xl p-3.5">
+          <span class="text-[11px] font-bold text-yellow-950/75 block">Código de Rastreio do Pedido</span>
+          <span class="text-lg font-extrabold text-[#1F2937] tracking-wide">${escapeHTML(order.id)}</span>
+          <span class="text-xs font-bold text-[#15803D] block mt-0.5">Total: ${formatBRL(order.total)} • ${escapeHTML(order.paymentMethod)}</span>
+        </div>
+
+        <button
+          type="button"
+          onclick="sendOrderToStoreWhatsApp('${order.id}')"
+          class="w-full py-3 px-4 rounded-xl bg-[#15803D] hover:bg-[#166534] text-white font-extrabold text-sm transition cursor-pointer shadow-2xs"
+        >
+          📲 Enviar Pedido no WhatsApp da Loja
+        </button>
+
+        <div class="flex flex-col sm:flex-row gap-2">
+          <button
+            type="button"
+            onclick="closeOrderSuccessModal()"
+            class="flex-1 py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 cursor-pointer"
+          >
+            Continuar Comprando
+          </button>
+          <button
+            type="button"
+            onclick="goToMyOrderTracking('${order.id}')"
+            class="flex-1 py-2.5 px-4 rounded-xl bg-[#FACC15] hover:bg-yellow-400 text-xs font-extrabold text-[#1F2937] border border-yellow-400 cursor-pointer"
+          >
+            📦 Rastrear Pedido
+          </button>
+        </div>
+      `;
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeOrderSuccessModal() {
+      const modal = document.getElementById('orderSuccessModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function goToMyOrderTracking(orderCode) {
+      closeOrderSuccessModal();
+      switchTab('meus-pedidos');
+      const searchEl = document.getElementById('myOrderSearchInput');
+      if (searchEl) {
+        searchEl.value = orderCode;
+        renderMyOrders();
+      }
+    }
+
+    // =========================================================================
+    // 11. MEUS PEDIDOS (PÚBLICO) & PEDIDOS LOJA (ADMIN)
+    // =========================================================================
+    function updateOrderBadges() {
+      const myCount = state.currentUser
+        ? state.orders.filter(o => o.userId === state.currentUser.id).length
+        : state.orders.length;
+
+      document.getElementById('navMyOrdersBadge').textContent = myCount;
+      document.getElementById('navAdminOrdersBadge').textContent = state.orders.length;
+    }
+
+    function renderOrderTimelineHTML(currentStep) {
+      return ORDER_STEPS.map((stepLabel, idx) => {
+        const completed = idx <= currentStep;
+        const isCurrent = idx === currentStep;
+        return `
+          <div class="flex-1 flex flex-col items-center text-center relative">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-extrabold border-2 z-10 ${
+              completed
+                ? 'bg-[#15803D] border-[#15803D] text-white'
+                : 'bg-white border-slate-300 text-slate-400'
+            } ${isCurrent ? 'ring-4 ring-emerald-100' : ''}">
+              ${completed ? '✓' : idx + 1}
+            </div>
+            <span class="text-[11px] font-bold mt-1.5 leading-tight ${
+              completed ? 'text-[#1F2937]' : 'text-slate-400'
+            }">
+              ${stepLabel}
+            </span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderMyOrders() {
+      const container = document.getElementById('myOrdersListContainer');
+      const query = (document.getElementById('myOrderSearchInput')?.value || '').trim().toLowerCase();
+
+      let list = [...state.orders];
+      if (!query && state.currentUser) {
+        list = list.filter(o => o.userId === state.currentUser.id);
+      }
+      if (query) {
+        list = list.filter(o =>
+          o.id.toLowerCase().includes(query) ||
+          o.customerName.toLowerCase().includes(query)
+        );
+      }
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl p-8 text-center border border-yellow-200 space-y-2">
+            <span class="text-3xl block">📦</span>
+            <p class="font-extrabold text-[#1F2937]">Nenhum pedido encontrado</p>
+            <p class="text-xs text-slate-500">Finalize uma compra na vitrine para gerar um código de rastreio e enviar pelo WhatsApp.</p>
+            <button
+              type="button"
+              onclick="switchTab('vitrine')"
+              class="mt-2 px-4 py-2 rounded-xl bg-[#15803D] text-white text-xs font-bold cursor-pointer"
+            >
+              Ir para a Vitrine
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = list.map(order => {
+        const currentStep = Math.min(order.statusIndex || 0, ORDER_STEPS.length - 1);
+        const isDelivered = currentStep >= ORDER_STEPS.length - 1;
+
+        return `
+          <div class="bg-white rounded-2xl p-5 border border-yellow-200 shadow-2xs space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="font-extrabold text-base text-[#1F2937]">${escapeHTML(order.id)}</span>
+                  <span class="text-xs font-bold px-2.5 py-0.5 rounded-lg ${
+                    isDelivered ? 'bg-emerald-100 text-[#15803D]' : 'bg-[#FEFCE8] text-yellow-950 border border-yellow-300'
+                  }">
+                    ${ORDER_STEPS[currentStep]}
+                  </span>
+                </div>
+                <p class="text-xs text-slate-500 mt-0.5">
+                  Cliente: <strong>${escapeHTML(order.customerName)}</strong> • ${formatDateTimeBR(order.createdAt)}
+                </p>
+              </div>
+
+              <div class="text-right">
+                <span class="text-xs text-slate-500 block">Total (${escapeHTML(order.paymentMethod)})</span>
+                <span class="text-lg font-extrabold text-[#15803D]">${formatBRL(order.total)}</span>
+              </div>
+            </div>
+
+            <div class="bg-[#FFFDF2] rounded-2xl p-4 border border-yellow-200/80">
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                ${renderOrderTimelineHTML(currentStep)}
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+              <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 space-y-1">
+                <span class="font-extrabold text-[#1F2937] block">Itens do Pedido:</span>
+                ${order.items.map(i => `
+                  <div class="flex justify-between text-slate-700">
+                    <span>${i.qty}x ${escapeHTML(i.name)} (${escapeHTML(i.weight)})</span>
+                    <span class="font-bold">${formatBRL(i.lineTotal)}</span>
+                  </div>
+                `).join('')}
+                <div class="flex justify-between text-slate-500 pt-1 border-t border-slate-200">
+                  <span>Frete (${escapeHTML(order.shippingMethod)}):</span>
+                  <span class="font-bold">${order.shippingCost === 0 ? 'Grátis' : formatBRL(order.shippingCost)}</span>
+                </div>
+              </div>
+
+              <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 flex flex-col justify-between gap-2">
+                <div>
+                  <span class="font-extrabold text-[#1F2937] block">Entrega & CEP:</span>
+                  <p class="text-slate-600 mt-0.5">${escapeHTML(order.address)}</p>
+                  ${order.cep ? `<p class="text-slate-500 font-semibold mt-0.5">CEP: ${escapeHTML(order.cep)}</p>` : ''}
+                </div>
+
+                <div class="flex justify-end pt-2 border-t border-slate-200">
+                  <button
+                    type="button"
+                    onclick="sendOrderToStoreWhatsApp('${order.id}')"
+                    class="w-full sm:w-auto px-4 py-2 rounded-xl bg-[#15803D] hover:bg-[#166534] text-white font-bold text-xs transition cursor-pointer"
+                  >
+                    📲 Enviar Pedido no WhatsApp da Loja
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderAdminOrders() {
+      const container = document.getElementById('adminOrdersListContainer');
+      const query = (document.getElementById('adminOrderSearchInput')?.value || '').trim().toLowerCase();
+
+      const filtered = state.orders.filter(o =>
+        !query ||
+        o.id.toLowerCase().includes(query) ||
+        o.customerName.toLowerCase().includes(query) ||
+        (o.customerWhatsApp || '').toLowerCase().includes(query)
+      );
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl p-8 text-center border border-yellow-200">
+            <p class="font-bold text-[#1F2937]">Nenhum pedido registrado na loja.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(order => {
+        const currentStep = Math.min(order.statusIndex || 0, ORDER_STEPS.length - 1);
+        const isDelivered = currentStep >= ORDER_STEPS.length - 1;
+
+        return `
+          <div class="bg-white rounded-2xl p-5 border border-yellow-200 shadow-2xs space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="font-extrabold text-base text-[#1F2937]">${escapeHTML(order.id)}</span>
+                  <span class="text-xs font-bold px-2.5 py-0.5 rounded-lg ${
+                    isDelivered ? 'bg-emerald-100 text-[#15803D]' : 'bg-[#FEFCE8] text-yellow-950 border border-yellow-300'
+                  }">
+                    ${ORDER_STEPS[currentStep]}
+                  </span>
+                </div>
+                <p class="text-xs text-slate-600 mt-0.5">
+                  Cliente: <strong>${escapeHTML(order.customerName)}</strong> • 📱 <strong>${escapeHTML(order.customerWhatsApp || 'Sem WhatsApp')}</strong> • ${formatDateTimeBR(order.createdAt)}
+                </p>
+              </div>
+
+              <div class="text-right">
+                <span class="text-xs text-slate-500 block">Total (${escapeHTML(order.paymentMethod)})</span>
+                <span class="text-lg font-extrabold text-[#15803D]">${formatBRL(order.total)}</span>
+              </div>
+            </div>
+
+            <div class="bg-[#FFFDF2] rounded-2xl p-4 border border-yellow-200/80">
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                ${renderOrderTimelineHTML(currentStep)}
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+              <p class="text-xs text-slate-600">
+                📍 <strong>Entrega:</strong> ${escapeHTML(order.address)} (CEP: ${escapeHTML(order.cep)})
+              </p>
+
+              <div class="flex flex-wrap items-center gap-2 ml-auto">
+                <button
+                  type="button"
+                  onclick="notifyCustomerOrderWhatsApp('${order.id}')"
+                  class="px-3.5 py-2 rounded-xl bg-[#15803D] hover:bg-[#166534] text-white font-bold text-xs transition cursor-pointer"
+                >
+                  📲 Notificar Cliente no WhatsApp
+                </button>
+
+                ${
+                  isDelivered
+                    ? `<span class="text-xs font-extrabold text-[#15803D] px-2">✓ Concluído</span>`
+                    : `<button
+                        type="button"
+                        onclick="advanceOrderStatus('${order.id}')"
+                        class="px-3.5 py-2 rounded-xl bg-[#FACC15] hover:bg-yellow-400 text-[#1F2937] font-extrabold text-xs border border-yellow-400 transition cursor-pointer"
+                      >
+                        Avançar Etapa →
+                      </button>`
+                }
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function advanceOrderStatus(orderId) {
+      const order = state.orders.find(o => o.id === orderId);
+      if (!order) return;
+      if (order.statusIndex < ORDER_STEPS.length - 1) {
+        order.statusIndex += 1;
+        persistOrders();
+        renderAll();
+        showToast(`Pedido ${order.id} avançou para "${ORDER_STEPS[order.statusIndex]}". Clique em Notificar Cliente no WhatsApp!`, 'success');
+      }
+    }
+
+    // =========================================================================
+    // 12. ESTOQUE & PRODUTOS (COM UPLOAD DE FOTO DA GALERIA)
+    // =========================================================================
+    function compressGalleryImage(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = new Image();
+          img.onload = function () {
+            const MAX_SIZE = 400;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+              if (width > MAX_SIZE) {
+                height = Math.round((height * MAX_SIZE) / width);
+                width = MAX_SIZE;
+              }
+            } else {
+              if (height > MAX_SIZE) {
+                width = Math.round((width * MAX_SIZE) / height);
+                height = MAX_SIZE;
+              }
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, width, height);
+            ctx.drawImage(img, 0, 0, width, height);
+
+            resolve(canvas.toDataURL('image/jpeg', 0.78));
+          };
+          img.onerror = () => reject(new Error('Falha ao ler imagem.'));
+          img.src = e.target.result;
+        };
+        reader.onerror = () => reject(new Error('Falha ao abrir arquivo.'));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function handleGalleryFileSelect(inputEl, target) {
+      const file = inputEl.files && inputEl.files[0];
+      if (!file) return;
+
+      try {
+        const compressedDataUrl = await compressGalleryImage(file);
+        if (target === 'new') {
+          state.pendingNewPhotoData = compressedDataUrl;
+          document.getElementById('newProdPreviewBox').innerHTML =
+            `<img src="${compressedDataUrl}" alt="Preview" class="w-full h-full object-cover" />`;
+          document.getElementById('btnClearNewPhoto').classList.remove('hidden');
+        } else if (target === 'edit') {
+          state.pendingEditPhotoData = compressedDataUrl;
+          document.getElementById('editProdPreviewBox').innerHTML =
+            `<img src="${compressedDataUrl}" alt="Preview" class="w-full h-full object-cover" />`;
+        }
+        showToast('Foto carregada da galeria!', 'success');
+      } catch (err) {
+        showToast('Não foi possível processar esta imagem.', 'error');
+      }
+    }
+
+    function clearNewProductPhoto() {
+      state.pendingNewPhotoData = null;
+      document.getElementById('newProdPhotoInput').value = '';
+      document.getElementById('newProdPreviewBox').innerHTML = '<span class="text-3xl">📷</span>';
+      document.getElementById('btnClearNewPhoto').classList.add('hidden');
+    }
+
+    function handleCreateProduct(event) {
+      if (event) event.preventDefault();
+
+      const name = document.getElementById('newProdName').value.trim();
+      const weight = document.getElementById('newProdWeight').value.trim() || '100g';
+      const category = document.getElementById('newProdCategory').value;
+      const retailPrice = parseDecimalBR(document.getElementById('newProdRetail').value);
+      const wholesalePrice = parseDecimalBR(document.getElementById('newProdWholesale').value);
+      const costRaw = parseDecimalBR(document.getElementById('newProdCost').value);
+      const stockRaw = document.getElementById('newProdStock').value.trim();
+      const stockVal = stockRaw === '' ? 0 : parseInt(stockRaw, 10);
+
+      if (!name) {
+        showToast('Informe o nome do condimento.', 'error');
+        document.getElementById('newProdName').focus();
+        return;
+      }
+
+      if (isNaN(retailPrice) || retailPrice <= 0 || isNaN(wholesalePrice) || wholesalePrice <= 0) {
+        showToast('Informe preços válidos de Varejo e Atacado.', 'error');
+        return;
+      }
+
+      if (isNaN(stockVal) || stockVal < 0) {
+        showToast('Informe uma quantidade válida em estoque.', 'error');
+        return;
+      }
+
+      const costPrice = isNaN(costRaw) || costRaw < 0 ? Number((wholesalePrice * 0.55).toFixed(2)) : Number(costRaw.toFixed(2));
+
+      const paletteByCat = {
+        'Temperos Secos': { themeColor: '#D97706', accentColor: '#FEF3C7' },
+        'Pimentas': { themeColor: '#DC2626', accentColor: '#FEE2E2' },
+        'Ervas': { themeColor: '#15803D', accentColor: '#DCFCE7' },
+        'Sais & Especiarias': { themeColor: '#DB2777', accentColor: '#FCE7F3' }
+      };
+      const colors = paletteByCat[category] || paletteByCat['Temperos Secos'];
+
+      const newProduct = {
+        id: 'prod-' + Date.now(),
+        name,
+        weight,
+        category,
+        retailPrice: Number(retailPrice.toFixed(2)),
+        wholesalePrice: Number(wholesalePrice.toFixed(2)),
+        costPrice,
+        stock: Math.floor(stockVal),
+        themeColor: colors.themeColor,
+        accentColor: colors.accentColor,
+        imageData: state.pendingNewPhotoData || null
+      };
+
+      state.products.unshift(newProduct);
+      if (!persistProducts()) {
+        state.products.shift();
+        return;
+      }
+
+      document.getElementById('newProductForm').reset();
+      clearNewProductPhoto();
+      renderAll();
+      showToast('Produto cadastrado com sucesso!', 'success');
+    }
+
+    function renderStockGrid() {
+      const grid = document.getElementById('stockProductsGrid');
+      const query = (document.getElementById('stockSearchInput')?.value || '').trim().toLowerCase();
+
+      const lowCount = state.products.filter(p => p.stock <= 5).length;
+      document.getElementById('lowStockCounterBadge').textContent = lowCount;
+
+      const filtered = state.products.filter(p =>
+        !query ||
+        p.name.toLowerCase().includes(query) ||
+        p.category.toLowerCase().includes(query)
+      );
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div class="col-span-full py-8 text-center text-sm text-slate-500">Nenhum produto encontrado.</div>`;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(p => {
+        const isZero = p.stock === 0;
+        const isLow = p.stock > 0 && p.stock <= 5;
+
+        return `
+          <div class="bg-[#FFFDF2] rounded-2xl p-4 border ${isZero ? 'border-red-300' : isLow ? 'border-amber-300' : 'border-yellow-200'} flex flex-col justify-between gap-3">
+            <div class="flex items-start gap-3">
+              <div class="w-16 h-16 rounded-2xl bg-white border border-yellow-200 overflow-hidden shrink-0">
+                ${renderProductVisual(p)}
+              </div>
+
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-[11px] font-semibold text-slate-500">${escapeHTML(p.category)} • ${escapeHTML(p.weight)}</span>
+                  ${
+                    isZero
+                      ? `<span class="text-[11px] font-bold bg-red-100 text-red-700 px-2 py-0.5 rounded-lg">Zerado</span>`
+                      : isLow
+                      ? `<span class="text-[11px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-lg">Estoque Baixo</span>`
+                      : `<span class="text-[11px] font-bold bg-emerald-100 text-[#15803D] px-2 py-0.5 rounded-lg">Em Dia</span>`
+                  }
+                </div>
+
+                <h3 class="font-extrabold text-sm sm:text-base text-[#1F2937] truncate mt-0.5">
+                  ${escapeHTML(p.name)}
+                </h3>
+
+                <div class="flex flex-wrap items-center gap-2.5 mt-1 text-xs">
+                  <span class="text-slate-600">Varejo: <strong class="text-[#1F2937]">${formatBRL(p.retailPrice)}</strong></span>
+                  <span class="text-[#15803D] font-bold">Atacado: <strong>${formatBRL(p.wholesalePrice)}</strong></span>
+                  <span class="text-slate-500">CMV: <strong>${formatBRL(p.costPrice || 0)}</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-3 border-t border-yellow-200/80 flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-1">
+                <button type="button" onclick="adjustProductStock('${p.id}', -1)" class="w-7 h-8 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 font-bold text-xs cursor-pointer">-1</button>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value="${p.stock}"
+                  onchange="setProductExactStock('${p.id}', this.value)"
+                  class="w-16 h-8 text-center rounded-lg border ${
+                    isZero ? 'border-red-400 bg-red-50 text-red-700' : 'border-slate-300 bg-white'
+                  } font-extrabold text-xs focus:outline-none"
+                />
+                <button type="button" onclick="adjustProductStock('${p.id}', 1)" class="w-7 h-8 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 font-bold text-xs cursor-pointer">+1</button>
+                <button type="button" onclick="adjustProductStock('${p.id}', 10)" class="px-2 h-8 rounded-lg bg-[#FACC15] hover:bg-yellow-400 text-[#1F2937] font-bold text-xs border border-yellow-400 cursor-pointer">+10</button>
+              </div>
+
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="openEditProductModal('${p.id}')" class="px-3 py-1.5 rounded-xl bg-white hover:bg-[#FEFCE8] text-[#1F2937] border border-yellow-400 font-bold text-xs cursor-pointer">
+                  ✏️ Editar
+                </button>
+                <button type="button" onclick="askDeleteProduct('${p.id}')" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-red-50 text-red-600 border border-red-200 font-bold text-xs cursor-pointer">
+                  Excluir
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function adjustProductStock(productId, delta) {
+      const prod = state.products.find(p => p.id === productId);
+      if (!prod) return;
+      prod.stock = Math.max(0, prod.stock + delta);
+      persistProducts();
+      renderAll();
+    }
+
+    function setProductExactStock(productId, rawVal) {
+      const prod = state.products.find(p => p.id === productId);
+      if (!prod) return;
+      const parsed = parseInt(rawVal, 10);
+      prod.stock = isNaN(parsed) ? 0 : Math.max(0, parsed);
+      persistProducts();
+      renderAll();
+      showToast(`Estoque de ${prod.name} atualizado para ${prod.stock} un.`, 'success');
+    }
+
+    function openEditProductModal(productId) {
+      const prod = state.products.find(p => p.id === productId);
+      if (!prod) return;
+
+      state.pendingEditPhotoData = undefined;
+      document.getElementById('editProdId').value = prod.id;
+      document.getElementById('editProdName').value = prod.name;
+      document.getElementById('editProdCategory').value = prod.category;
+      document.getElementById('editProdWeight').value = prod.weight || '100g';
+      document.getElementById('editProdRetail').value = prod.retailPrice.toFixed(2).replace('.', ',');
+      document.getElementById('editProdWholesale').value = prod.wholesalePrice.toFixed(2).replace('.', ',');
+      document.getElementById('editProdCost').value = Number(prod.costPrice || 0).toFixed(2).replace('.', ',');
+      document.getElementById('editProdStock').value = prod.stock;
+      document.getElementById('editProdPhotoInput').value = '';
+      document.getElementById('editProdPreviewBox').innerHTML = renderProductVisual(prod);
+
+      const modal = document.getElementById('editProductModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function restoreDefaultProductIllustration() {
+      const id = document.getElementById('editProdId').value;
+      const prod = state.products.find(p => p.id === id);
+      if (!prod) return;
+      state.pendingEditPhotoData = null;
+      document.getElementById('editProdPhotoInput').value = '';
+      document.getElementById('editProdPreviewBox').innerHTML = getCondimentSVG(prod);
+      showToast('Ilustração padrão selecionada.', 'info');
+    }
+
+    function closeEditProductModal() {
+      const modal = document.getElementById('editProductModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function handleSaveEditedProduct(event) {
+      if (event) event.preventDefault();
+      const id = document.getElementById('editProdId').value;
+      const prod = state.products.find(p => p.id === id);
+      if (!prod) return;
+
+      const name = document.getElementById('editProdName').value.trim();
+      const category = document.getElementById('editProdCategory').value;
+      const weight = document.getElementById('editProdWeight').value.trim() || '100g';
+      const retailPrice = parseDecimalBR(document.getElementById('editProdRetail').value);
+      const wholesalePrice = parseDecimalBR(document.getElementById('editProdWholesale').value);
+      const costPrice = parseDecimalBR(document.getElementById('editProdCost').value);
+      const stock = parseInt(document.getElementById('editProdStock').value, 10);
+
+      if (!name || isNaN(retailPrice) || retailPrice <= 0 || isNaN(wholesalePrice) || wholesalePrice <= 0 || isNaN(costPrice) || costPrice < 0 || isNaN(stock) || stock < 0) {
+        showToast('Verifique os valores preenchidos antes de salvar.', 'error');
+        return;
+      }
+
+      const previousImage = prod.imageData;
+      prod.name = name;
+      prod.category = category;
+      prod.weight = weight;
+      prod.retailPrice = Number(retailPrice.toFixed(2));
+      prod.wholesalePrice = Number(wholesalePrice.toFixed(2));
+      prod.costPrice = Number(costPrice.toFixed(2));
+      prod.stock = Math.floor(stock);
+
+      if (state.pendingEditPhotoData !== undefined) {
+        prod.imageData = state.pendingEditPhotoData;
+      }
+
+      if (!persistProducts()) {
+        prod.imageData = previousImage;
+        return;
+      }
+
+      closeEditProductModal();
+      renderAll();
+      showToast('Produto atualizado com sucesso!', 'success');
+    }
+
+    function askDeleteProduct(productId) {
+      const prod = state.products.find(p => p.id === productId);
+      if (!prod) return;
+
+      openConfirmDialog(
+        'Excluir Produto',
+        `Deseja remover "${prod.name}" da vitrine e do estoque?`,
+        'Excluir',
+        () => {
+          state.products = state.products.filter(p => p.id !== productId);
+          state.cart = state.cart.filter(c => c.productId !== productId);
+          persistProducts();
+          persistCart();
+          renderAll();
+          showToast('Produto excluído.', 'info');
+        }
+      );
+    }
+
+    // =========================================================================
+    // 13. FLUXO DE CAIXA SINCRONIZADO, TAXAS, LUCRO LÍQUIDO & GRÁFICO
+    // =========================================================================
+    function updateManualDefaultFee() {
+      const payment = document.getElementById('cashNewPayment').value;
+      const defaultRate = state.settings.fees[payment] ?? 0;
+      document.getElementById('cashNewFeePercent').value = String(defaultRate).replace('.', ',');
+    }
+
+    function handleCreateCashEntry(event) {
+      if (event) event.preventDefault();
+
+      const type = document.getElementById('cashNewType').value;
+      const description = document.getElementById('cashNewDesc').value.trim();
+      const category = document.getElementById('cashNewCategory').value;
+      const payment = document.getElementById('cashNewPayment').value;
+      const grossAmount = parseDecimalBR(document.getElementById('cashNewAmount').value);
+      const feeRaw = parseDecimalBR(document.getElementById('cashNewFeePercent').value);
+      const dateVal = document.getElementById('cashNewDate').value;
+
+      if (!description) {
+        showToast('Informe a descrição do lançamento.', 'error');
+        document.getElementById('cashNewDesc').focus();
+        return;
+      }
+
+      if (isNaN(grossAmount) || grossAmount <= 0) {
+        showToast('Informe um valor bruto válido maior que zero.', 'error');
+        document.getElementById('cashNewAmount').focus();
+        return;
+      }
+
+      const feePercent = type === 'Entrada' && !isNaN(feeRaw) && feeRaw >= 0 ? feeRaw : 0;
+      const feeAmount = Number(((grossAmount * feePercent) / 100).toFixed(2));
+      const netAmount = type === 'Entrada'
+        ? Number((grossAmount - feeAmount).toFixed(2))
+        : Number(grossAmount.toFixed(2));
+
+      const isoDate = dateVal ? new Date(dateVal).toISOString() : new Date().toISOString();
+
+      state.cashEntries.unshift({
+        id: 'cash-man-' + Date.now(),
+        date: isoDate,
+        type,
+        category,
+        description,
+        payment,
+        grossAmount: Number(grossAmount.toFixed(2)),
+        feePercent,
+        feeAmount,
+        netAmount,
+        cmvAmount: 0,
+        orderId: null
+      });
+
+      persistCash();
+      document.getElementById('manualCashForm').reset();
+      document.getElementById('cashNewFeePercent').value = '0';
+      document.getElementById('cashNewDate').value = toDatetimeLocalValue(new Date().toISOString());
+      renderAll();
+      showToast(`${type} de ${formatBRL(grossAmount)} registrada no caixa!`, 'success');
+    }
+
+    function setCashFilter(filter) {
+      state.cashFilter = filter;
+      ['Todos', 'Entrada', 'Saída'].forEach(f => {
+        const btn = document.getElementById(`cfilter-${f}`);
+        btn.className = f === filter
+          ? 'px-3 py-1 rounded-lg text-xs font-bold bg-[#1F2937] text-[#FACC15] cursor-pointer'
+          : 'px-3 py-1 rounded-lg text-xs font-bold text-[#1F2937] cursor-pointer';
+      });
+      renderCashFlow();
+    }
+
+    function computeCashMetrics() {
+      let grossInflow = 0;
+      let inflowCount = 0;
+      let totalFees = 0;
+      let totalOutflow = 0;
+      let outflowCount = 0;
+      let totalCmv = 0;
+
+      state.cashEntries.forEach(entry => {
+        const gross = Number(entry.grossAmount ?? entry.amount ?? 0);
+        const fee = Number(entry.feeAmount ?? 0);
+        const cmv = Number(entry.cmvAmount ?? 0);
+
+        if (entry.type === 'Entrada') {
+          grossInflow += gross;
+          totalFees += fee;
+          totalCmv += cmv;
+          inflowCount++;
+        } else {
+          totalOutflow += gross;
+          outflowCount++;
+        }
+      });
+
+      const netInflow = grossInflow - totalFees;
+      const netBalance = netInflow - totalOutflow;
+      const netProfit = netInflow - totalCmv - totalOutflow;
+
+      return {
+        grossInflow,
+        inflowCount,
+        totalFees,
+        totalOutflow,
+        outflowCount,
+        totalCmv,
+        netBalance,
+        netProfit
+      };
+    }
+
+    function renderCashFlow() {
+      const m = computeCashMetrics();
+
+      document.getElementById('cashKpiGrossInflow').textContent = formatBRL(m.grossInflow);
+      document.getElementById('cashKpiInflowCount').textContent = `${m.inflowCount} ${m.inflowCount === 1 ? 'entrada' : 'entradas'}`;
+
+      document.getElementById('cashKpiFeesAndOutflows').textContent = formatBRL(m.totalFees + m.totalOutflow);
+      document.getElementById('cashKpiFeesDetail').textContent = `Taxas: ${formatBRL(m.totalFees)} • Saídas: ${formatBRL(m.totalOutflow)}`;
+
+      const balEl = document.getElementById('cashKpiNetBalance');
+      balEl.textContent = formatBRL(m.netBalance);
+      balEl.className = `text-2xl font-extrabold mt-1.5 ${m.netBalance < 0 ? 'text-red-700' : 'text-[#1F2937]'}`;
+
+      const profEl = document.getElementById('cashKpiNetProfit');
+      profEl.textContent = formatBRL(m.netProfit);
+      profEl.className = `text-2xl font-extrabold mt-1.5 ${m.netProfit < 0 ? 'text-red-700' : 'text-[#15803D]'}`;
+      document.getElementById('cashKpiCmvDetail').textContent = `CMV vendas: ${formatBRL(m.totalCmv)}`;
+
+      // Renderiza Gráfico Comparativo Visual
+      const maxVal = Math.max(m.grossInflow, m.totalFees + m.totalOutflow, Math.max(0, m.netProfit), 1);
+      const bars = [
+        { label: 'Entradas Brutas', val: m.grossInflow, color: 'bg-[#15803D]' },
+        { label: 'Taxas de Pagamento', val: m.totalFees, color: 'bg-amber-500' },
+        { label: 'Saídas & Despesas', val: m.totalOutflow, color: 'bg-red-500' },
+        { label: 'Lucro Líquido Estimado', val: Math.max(0, m.netProfit), color: 'bg-[#FACC15]' }
+      ];
+
+      document.getElementById('cashComparativeChart').innerHTML = bars.map(b => {
+        const pct = Math.min(100, Math.round((b.val / maxVal) * 100));
+        return `
+          <div class="space-y-1">
+            <div class="flex justify-between text-xs font-bold">
+              <span class="text-[#1F2937]">${b.label}</span>
+              <span class="text-slate-700">${formatBRL(b.val)}</span>
+            </div>
+            <div class="w-full h-3 rounded-full bg-slate-100 overflow-hidden">
+              <div class="h-full rounded-full ${b.color} transition-all duration-300" style="width: ${pct}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Renderiza Extrato
+      const listEl = document.getElementById('cashEntriesList');
+      const query = (document.getElementById('cashSearchInput')?.value || '').trim().toLowerCase();
+
+      const sorted = [...state.cashEntries].sort((a, b) => new Date(b.date) - new Date(a.date));
+      const filtered = sorted.filter(entry => {
+        const matchType = state.cashFilter === 'Todos' || entry.type === state.cashFilter;
+        const matchQuery =
+          !query ||
+          entry.description.toLowerCase().includes(query) ||
+          (entry.category || '').toLowerCase().includes(query) ||
+          (entry.payment || '').toLowerCase().includes(query);
+        return matchType && matchQuery;
+      });
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = `<div class="py-8 text-center text-sm text-slate-500">Nenhum lançamento encontrado.</div>`;
+        return;
+      }
+
+      listEl.innerHTML = filtered.map(entry => {
+        const isIn = entry.type === 'Entrada';
+        const isAutoSale = Boolean(entry.orderId) || entry.description.includes('Venda Automática');
+        const gross = Number(entry.grossAmount ?? entry.amount ?? 0);
+        const feeAmount = Number(entry.feeAmount ?? 0);
+        const net = Number(entry.netAmount ?? gross);
+
+        return `
+          <div class="py-3.5 flex flex-wrap lg:flex-nowrap items-center justify-between gap-3">
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="text-[11px] font-bold px-2 py-0.5 rounded-lg ${
+                  isIn ? 'bg-emerald-100 text-[#15803D]' : 'bg-red-100 text-red-700'
+                }">
+                  ${escapeHTML(entry.type)}
+                </span>
+
+                ${
+                  isAutoSale
+                    ? `<span class="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-[#FEFCE8] text-yellow-950 border border-yellow-300">
+                        Venda Automática${entry.orderId ? ` #${escapeHTML(entry.orderId)}` : ''}
+                      </span>`
+                    : `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600">
+                        ${escapeHTML(entry.category || 'Manual')}
+                      </span>`
+                }
+
+                <span class="text-xs text-slate-500">${formatDateTimeBR(entry.date)}</span>
+                <span class="text-xs font-semibold text-slate-600">• ${escapeHTML(entry.payment)}</span>
+              </div>
+
+              <p class="font-bold text-sm text-[#1F2937] mt-1 break-words">
+                ${escapeHTML(entry.description)}
+              </p>
+
+              ${
+                isIn && feeAmount > 0
+                  ? `<p class="text-[11px] text-slate-500 mt-0.5">
+                      Bruto: <strong>${formatBRL(gross)}</strong> • Taxa (${entry.feePercent}%): <span class="text-red-600">- ${formatBRL(feeAmount)}</span> • Líquido: <strong class="text-[#15803D]">${formatBRL(net)}</strong>
+                    </p>`
+                  : ''
+              }
+            </div>
+
+            <div class="flex items-center gap-2 ml-auto shrink-0">
+              <div class="text-right mr-1">
+                <span class="font-extrabold text-sm sm:text-base block ${isIn ? 'text-[#15803D]' : 'text-red-600'}">
+                  ${isIn ? '+' : '-'} ${formatBRL(net)}
+                </span>
+                ${isIn && feeAmount > 0 ? `<span class="text-[10px] text-slate-400 block">Bruto ${formatBRL(gross)}</span>` : ''}
+              </div>
+
+              <button
+                type="button"
+                onclick="openEditCashModal('${entry.id}')"
+                class="px-2.5 py-1.5 rounded-xl bg-[#FEFCE8] hover:bg-yellow-200/70 text-[#1F2937] border border-yellow-300 font-bold text-xs cursor-pointer"
+              >
+                ✏️ Editar
+              </button>
+
+              <button
+                type="button"
+                onclick="askDeleteCashEntry('${entry.id}')"
+                class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-red-50 text-red-600 border border-red-200 font-bold text-xs cursor-pointer"
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openEditCashModal(entryId) {
+      const entry = state.cashEntries.find(c => c.id === entryId);
+      if (!entry) return;
+
+      const gross = Number(entry.grossAmount ?? entry.amount ?? 0);
+      const feePct = Number(entry.feePercent ?? 0);
+
+      document.getElementById('editCashId').value = entry.id;
+      document.getElementById('editCashType').value = entry.type;
+      document.getElementById('editCashGross').value = gross.toFixed(2).replace('.', ',');
+      document.getElementById('editCashFeePercent').value = String(feePct).replace('.', ',');
+      document.getElementById('editCashDesc').value = entry.description;
+      document.getElementById('editCashCategory').value = entry.category || 'Outros';
+      document.getElementById('editCashPayment').value = entry.payment || 'PIX';
+      document.getElementById('editCashDate').value = toDatetimeLocalValue(entry.date);
+
+      const modal = document.getElementById('editCashModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeEditCashModal() {
+      const modal = document.getElementById('editCashModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function handleSaveEditedCash(event) {
+      if (event) event.preventDefault();
+
+      const id = document.getElementById('editCashId').value;
+      const entry = state.cashEntries.find(c => c.id === id);
+      if (!entry) return;
+
+      const type = document.getElementById('editCashType').value;
+      const grossAmount = parseDecimalBR(document.getElementById('editCashGross').value);
+      const feeRaw = parseDecimalBR(document.getElementById('editCashFeePercent').value);
+      const description = document.getElementById('editCashDesc').value.trim();
+      const category = document.getElementById('editCashCategory').value;
+      const payment = document.getElementById('editCashPayment').value;
+      const dateVal = document.getElementById('editCashDate').value;
+
+      if (!description || isNaN(grossAmount) || grossAmount <= 0) {
+        showToast('Informe descrição e valor bruto válidos.', 'error');
+        return;
+      }
+
+      const feePercent = type === 'Entrada' && !isNaN(feeRaw) && feeRaw >= 0 ? feeRaw : 0;
+      const feeAmount = Number(((grossAmount * feePercent) / 100).toFixed(2));
+      const netAmount = type === 'Entrada'
+        ? Number((grossAmount - feeAmount).toFixed(2))
+        : Number(grossAmount.toFixed(2));
+
+      entry.type = type;
+      entry.grossAmount = Number(grossAmount.toFixed(2));
+      entry.feePercent = feePercent;
+      entry.feeAmount = feeAmount;
+      entry.netAmount = netAmount;
+      entry.description = description;
+      entry.category = category;
+      entry.payment = payment;
+      if (dateVal) {
+        entry.date = new Date(dateVal).toISOString();
+      }
+
+      persistCash();
+      closeEditCashModal();
+      renderAll();
+      showToast('Lançamento atualizado e saldos recalculados!', 'success');
+    }
+
+    function askDeleteCashEntry(entryId) {
+      const entry = state.cashEntries.find(c => c.id === entryId);
+      if (!entry) return;
+
+      openConfirmDialog(
+        'Excluir Lançamento do Caixa',
+        `Deseja excluir "${entry.description}" (${entry.type} de ${formatBRL(entry.grossAmount ?? entry.amount)})?`,
+        'Excluir',
+        () => {
+          state.cashEntries = state.cashEntries.filter(c => c.id !== entryId);
+          persistCash();
+          renderAll();
+          showToast('Lançamento excluído e saldo atualizado.', 'info');
+        }
+      );
+    }
+
+    function exportCashCSV() {
+      if (state.cashEntries.length === 0) {
+        showToast('Não há lançamentos para exportar.', 'warning');
+        return;
+      }
+
+      const headers = ['Data/Hora', 'Tipo', 'Categoria', 'Descricao', 'Pagamento', 'Bruto (R$)', 'Taxa (%)', 'Liquido (R$)'];
+      const sorted = [...state.cashEntries].sort((a, b) => new Date(b.date) - new Date(a.date));
+      const rows = sorted.map(e => {
+        const sign = e.type === 'Entrada' ? 1 : -1;
+        const gross = (sign * Number(e.grossAmount ?? e.amount ?? 0)).toFixed(2).replace('.', ',');
+        const net = (sign * Number(e.netAmount ?? e.grossAmount ?? 0)).toFixed(2).replace('.', ',');
+        const fee = String(e.feePercent ?? 0).replace('.', ',');
+        return [
+          `"${formatDateTimeBR(e.date)}"`,
+          `"${e.type}"`,
+          `"${(e.category || '').replace(/"/g, '""')}"`,
+          `"${e.description.replace(/"/g, '""')}"`,
+          `"${e.payment}"`,
+          `"${gross}"`,
+          `"${fee}"`,
+          `"${net}"`
+        ].join(';');
+      });
+
+      const csv = '\uFEFF' + [headers.join(';'), ...rows].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `fluxo-caixa-atacadao-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Extrato CSV exportado!', 'success');
+    }
+
+    // =========================================================================
+    // 14. CONFIGURAÇÕES DA LOJA & BACKUP COMPLETO (.JSON)
+    // =========================================================================
+    function populateSettingsForm() {
+      document.getElementById('cfgStoreName').value = state.settings.storeName || '';
+      document.getElementById('cfgStoreWhatsApp').value = state.settings.storeWhatsApp || '';
+      document.getElementById('cfgPixKey').value = state.settings.pixKey || '';
+      document.getElementById('cfgFeePix').value = String(state.settings.fees['PIX'] ?? 0).replace('.', ',');
+      document.getElementById('cfgFeeCash').value = String(state.settings.fees['Dinheiro'] ?? 0).replace('.', ',');
+      document.getElementById('cfgFeeDebit').value = String(state.settings.fees['Cartão de Débito'] ?? 1.5).replace('.', ',');
+      document.getElementById('cfgFeeCredit').value = String(state.settings.fees['Cartão de Crédito'] ?? 3.5).replace('.', ',');
+      document.getElementById('cfgAdminPassword').value = state.settings.adminPassword || 'admin123';
+    }
+
+    function handleSaveSettings(event) {
+      if (event) event.preventDefault();
+
+      const storeName = document.getElementById('cfgStoreName').value.trim();
+      const storeWhatsApp = formatPhoneMask(document.getElementById('cfgStoreWhatsApp').value);
+      const pixKey = document.getElementById('cfgPixKey').value.trim();
+      const adminPassword = document.getElementById('cfgAdminPassword').value.trim();
+
+      const feePix = parseDecimalBR(document.getElementById('cfgFeePix').value);
+      const feeCash = parseDecimalBR(document.getElementById('cfgFeeCash').value);
+      const feeDebit = parseDecimalBR(document.getElementById('cfgFeeDebit').value);
+      const feeCredit = parseDecimalBR(document.getElementById('cfgFeeCredit').value);
+
+      if (!storeName || !pixKey || !adminPassword) {
+        showToast('Preencha Nome da Loja, Chave PIX e Senha Admin.', 'error');
+        return;
+      }
+
+      state.settings = {
+        storeName,
+        storeWhatsApp,
+        pixKey,
+        adminPassword,
+        fees: {
+          'PIX': isNaN(feePix) || feePix < 0 ? 0 : feePix,
+          'Dinheiro': isNaN(feeCash) || feeCash < 0 ? 0 : feeCash,
+          'Cartão de Débito': isNaN(feeDebit) || feeDebit < 0 ? 0 : feeDebit,
+          'Cartão de Crédito': isNaN(feeCredit) || feeCredit < 0 ? 0 : feeCredit,
+          'Transferência': 0
+        }
+      };
+
+      persistSettings();
+      renderAll();
+      showToast('Configurações da loja salvas com sucesso!', 'success');
+    }
+
+    function exportFullBackupJSON() {
+      const backupPayload = {
+        app: 'AtacadaoDosCondimentos',
+        version: '3.0',
+        exportedAt: new Date().toISOString(),
+        data: {
+          settings: state.settings,
+          products: state.products,
+          orders: state.orders,
+          cashEntries: state.cashEntries,
+          users: state.users
+        }
+      };
+
+      const jsonStr = JSON.stringify(backupPayload, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `backup-atacadao-condimentos-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Backup completo (.json) exportado com sucesso!', 'success');
+    }
+
+    function handleImportBackupJSON(inputEl) {
+      const file = inputEl.files && inputEl.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          const payload = parsed.data ? parsed.data : parsed;
+
+          if (!Array.isArray(payload.products) || !Array.isArray(payload.cashEntries)) {
+            showToast('Arquivo JSON inválido ou incompatível.', 'error');
+            return;
+          }
+
+          openConfirmDialog(
+            'Restaurar Backup JSON',
+            `Deseja substituir os dados atuais pelo backup de ${parsed.exportedAt ? formatDateTimeBR(parsed.exportedAt) : file.name}?`,
+            'Restaurar Backup',
+            () => {
+              if (payload.settings) state.settings = { ...DEFAULT_SETTINGS, ...payload.settings };
+              state.products = payload.products;
+              state.orders = Array.isArray(payload.orders) ? payload.orders : [];
+              state.cashEntries = payload.cashEntries;
+              if (Array.isArray(payload.users)) state.users = payload.users;
+
+              persistSettings();
+              persistProducts();
+              persistOrders();
+              persistCash();
+              persistUsers();
+              renderAll();
+              showToast('Backup restaurado com sucesso!', 'success');
+            }
+          );
+        } catch (err) {
+          showToast('Erro ao ler o arquivo JSON selecionado.', 'error');
+        } finally {
+          inputEl.value = '';
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function askFactoryReset() {
+      openConfirmDialog(
+        'Restaurar Dados de Fábrica',
+        'Isso apagará pedidos e alterações locais e restaurará os 8 condimentos originais e o caixa inicial. Continuar?',
+        'Restaurar Fábrica',
+        () => {
+          Object.values(STORAGE_KEYS).forEach(k => localStorage.removeItem(k));
+          loadFromStorage();
+          state.isAdmin = true;
+          sessionStorage.setItem(STORAGE_KEYS.ADMIN_AUTH, 'true');
+          renderAll();
+          showToast('Dados de fábrica restaurados!', 'success');
+        }
+      );
+    }
+
+    // =========================================================================
+    // 15. DIÁLOGO DE CONFIRMAÇÃO E TOASTS
+    // =========================================================================
+    function openConfirmDialog(title, message, confirmText, onConfirm) {
+      const modal = document.getElementById('confirmDialogModal');
+      const content = document.getElementById('confirmDialogContent');
+
+      content.innerHTML = `
+        <h3 class="text-base font-extrabold text-[#1F2937]">${escapeHTML(title)}</h3>
+        <p class="text-xs sm:text-sm text-slate-600">${escapeHTML(message)}</p>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" id="dlgCancelBtn" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 cursor-pointer">
+            Cancelar
+          </button>
+          <button type="button" id="dlgConfirmBtn" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-xs font-bold text-white cursor-pointer">
+            ${escapeHTML(confirmText)}
+          </button>
+        </div>
+      `;
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      document.getElementById('dlgCancelBtn').onclick = closeConfirmDialog;
+      document.getElementById('dlgConfirmBtn').onclick = () => {
+        closeConfirmDialog();
+        onConfirm();
+      };
+    }
+
+    function closeConfirmDialog() {
+      const modal = document.getElementById('confirmDialogModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+
+      const styles = {
+        success: 'bg-[#15803D] text-white border-emerald-700',
+        error: 'bg-red-600 text-white border-red-700',
+        warning: 'bg-[#FACC15] text-[#1F2937] border-yellow-400',
+        info: 'bg-[#1F2937] text-white border-slate-700'
+      };
+
+      toast.className = `pointer-events-auto rounded-xl border px-4 py-3 shadow-lg text-xs sm:text-sm font-bold toast-anim ${styles[type] || styles.success}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.2s ease';
+        setTimeout(() => toast.remove(), 220);
+      }, 3400);
+    }
+
+    // Fecha dropdowns ao clicar fora
+    document.addEventListener('click', (e) => {
+      const authBtn = document.getElementById('headerAuthBtn');
+      const authDropdown = document.getElementById('userAccountDropdown');
+      if (authBtn && authDropdown && !authBtn.contains(e.target) && !authDropdown.contains(e.target)) {
+        authDropdown.classList.add('hidden');
+      }
+
+      const wppWrapper = document.getElementById('floatingWhatsAppWrapper');
+      const wppMenu = document.getElementById('whatsappQuickMenu');
+      if (wppWrapper && wppMenu && !wppWrapper.contains(e.target)) {
+        wppMenu.classList.add('hidden');
+      }
+    });
+
+    // Inicializa aplicação
+    window.addEventListener('DOMContentLoaded', () => {
+      loadFromStorage();
+      const dateInput = document.getElementById('cashNewDate');
+      if (dateInput) dateInput.value = toDatetimeLocalValue(new Date().toISOString());
+      renderAll();
+    });
+  </script>
+</body>
+</html>
